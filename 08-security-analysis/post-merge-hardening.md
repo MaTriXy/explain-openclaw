@@ -134,6 +134,22 @@
 - [Feb 22 sync 8 (60 commits, 5 security)](./post-merge-hardening/2026-02-22-sync-8.md)
 - [Feb 22 sync 9 (60 commits, 1 security)](./post-merge-hardening/2026-02-22-sync-9.md)
 - [Feb 22 sync 10 (60 commits, 3 security)](./post-merge-hardening/2026-02-22-sync-10.md)
+- [Feb 22 sync 11 (80 commits, 20 security)](./post-merge-hardening/2026-02-22-sync-11.md)
+- [Feb 23 sync 1 (44 commits, 7 security)](./post-merge-hardening/2026-02-23-sync-1.md)
+- [Feb 23 sync 2 (18 commits, 6 security)](./post-merge-hardening/2026-02-23-sync-2.md)
+- [Feb 23 sync 3 (14 commits, 6 security)](./post-merge-hardening/2026-02-23-sync-3.md)
+- [Feb 23 sync 4 (36 commits, 0 security)](./post-merge-hardening/2026-02-23-sync-4.md)
+- [Feb 23 sync 5 (10 commits, 0 security)](./post-merge-hardening/2026-02-23-sync-5.md)
+- [Feb 23 sync 6 (4 commits, 0 security)](./post-merge-hardening/2026-02-23-sync-6.md)
+- [Feb 23 sync 7 (4 commits, 0 security)](./post-merge-hardening/2026-02-23-sync-7.md)
+- [Feb 23 sync 8 (4 commits, 0 security)](./post-merge-hardening/2026-02-23-sync-8.md)
+- [Feb 23 sync 9 (4 commits, 0 security)](./post-merge-hardening/2026-02-23-sync-9.md)
+- [Feb 23 sync 10 (10 commits, 1 security)](./post-merge-hardening/2026-02-23-sync-10.md)
+- [Feb 23 sync 11 (49 commits, 4 security)](./post-merge-hardening/2026-02-23-sync-11.md)
+- [Feb 23 sync 12 (1 commit, 0 security)](./post-merge-hardening/2026-02-23-sync-12.md)
+- [Feb 23 sync 13 (59 commits, 10 security)](./post-merge-hardening/2026-02-23-sync-13.md)
+- [Feb 23 sync 14 (59 commits, 4 security)](./post-merge-hardening/2026-02-23-sync-14.md)
+- [Feb 23 sync 15 (59 commits, 4 security)](./post-merge-hardening/2026-02-23-sync-15.md)
 
 ## Post-Merge Security Hardening
 
