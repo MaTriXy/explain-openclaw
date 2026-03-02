@@ -13,7 +13,7 @@
 | [#17936](https://github.com/openclaw/openclaw/issues/17936) | HIGH | message/sendAttachment exfiltrates local files when sandbox disabled | `src/infra/outbound/message-action-params.ts:240-241` — `normalizeSandboxMediaParams()` skips path validation when `sandboxRoot` absent; default sandbox-off mode is affected |
 | [#20305](https://github.com/openclaw/openclaw/issues/20305) | HIGH | message tool cross-user sends in multi-tenant deployments (no per-agent scoping) | `src/infra/outbound/message-action-runner.ts` — no `allowedRecipients` or per-agent channel filtering; affects deployments with `dmScope: "per-channel-peer"` and 200+ agents |
 | [#3277](https://github.com/openclaw/openclaw/issues/3277) | ~~HIGH~~ FIXED | Path validation bypass via `startsWith` prefix | Fixed upstream (COMPLETED 2026-02-15, consolidated Feb 19 sync 2); `src/infra/archive-path.ts:12,50` - `validateArchiveEntryPath()` + `resolveArchiveOutputPath()` (hardened Feb 15, consolidated to module Feb 19) |
-| [#4949](https://github.com/openclaw/openclaw/issues/4949) | HIGH (WONTFIX) | Browser control server DNS rebinding | Closed upstream as NOT_PLANNED (2026-02-17); still affects local code at `src/browser/server.ts:59`; no Host header validation |
+| [#4949](https://github.com/openclaw/openclaw/issues/4949) | HIGH (WONTFIX) | Browser control server DNS rebinding | Closed upstream as NOT_PLANNED (2026-02-17); still affects local code at `src/browser/server.ts:66`; no Host header validation |
 | [#4950](https://github.com/openclaw/openclaw/issues/4950) | HIGH (WONTFIX) | Arbitrary JS execution via browser evaluate (default on) | Closed upstream as NOT_PLANNED (2026-02-17); still affects local code at `src/browser/constants.ts:2` - `DEFAULT_BROWSER_EVALUATE_ENABLED = true` |
 | [#4995](https://github.com/openclaw/openclaw/issues/4995) | HIGH | iMessage dmPolicy auto-responds with pairing codes | `src/imessage/monitor/monitor-provider.ts:119,247-278` |
 | [#5052](https://github.com/openclaw/openclaw/issues/5052) | HIGH | Config validation fail-open returns `{}` | `src/config/io.ts:859,862` - security settings reset |
@@ -26,14 +26,14 @@
 | [#8586](https://github.com/openclaw/openclaw/issues/8586) | ~~HIGH~~ FIXED | Configurable bypass allows unrestricted command exec | Fixed upstream (COMPLETED 2026-02-14); `src/agents/bash-tools.exec.ts:202-210,272-274` |
 | [#8591](https://github.com/openclaw/openclaw/issues/8591) | HIGH (WONTFIX) | Env vars exposed via shell commands | Closed upstream as NOT_PLANNED (2026-02-13); still affects local code at `src/agents/bash-tools.exec.ts:293,301` |
 | [#8590](https://github.com/openclaw/openclaw/issues/8590) | ~~HIGH~~ FIXED | Status endpoint exposes sensitive internal info | Fixed upstream (COMPLETED 2026-02-15); `src/gateway/server-methods/health.ts:28-31` |
-| [#8696](https://github.com/openclaw/openclaw/issues/8696) | HIGH (WONTFIX) | Playwright download path traversal | Closed upstream as NOT_PLANNED (2026-02-24); `src/browser/pw-tools-core.downloads.ts:20-50` — `sanitizeDownloadFileName()` + `buildTempDownloadPath()` (hardened Feb 15 sync 2) |
+| [#8696](https://github.com/openclaw/openclaw/issues/8696) | HIGH (WONTFIX) | Playwright download path traversal | Closed upstream as NOT_PLANNED (2026-02-24); `src/browser/pw-tools-core.downloads.ts:22-28` — `sanitizeUntrustedFileName()` (from `safe-filename.js`) + `buildTempDownloadPath()` (hardened Feb 15 sync 2) |
 | [#8776](https://github.com/openclaw/openclaw/issues/8776) | ~~HIGH~~ FIXED | soul-evil hook silently hijacks agent | Fixed in PR [#14757](https://github.com/openclaw/openclaw/pull/14757) — soul-evil hook completely removed |
 | [#9435](https://github.com/openclaw/openclaw/issues/9435) | ~~HIGH~~ FIXED | Gateway auth token exposed in URL query params | Fixed in PR [#9436](https://github.com/openclaw/openclaw/pull/9436) — query token acceptance removed from `src/gateway/hooks.ts`, dashboard URL no longer passes `?token=` |
 | [#9512](https://github.com/openclaw/openclaw/issues/9512) | ~~HIGH~~ FIXED | Skill download archive path traversal | Fixed upstream (COMPLETED 2026-02-14); `src/agents/skills-install.ts:331,342` — now calls `extractArchiveSafe()` |
 | [#9517](https://github.com/openclaw/openclaw/issues/9517) | ~~HIGH~~ FIXED | Gateway canvas host auth bypass | Fixed in PR [#9518](https://github.com/openclaw/openclaw/pull/9518) — new `authorizeCanvasRequest()` at `src/gateway/server-http.ts:155-201` |
-| [#9627](https://github.com/openclaw/openclaw/issues/9627) | HIGH | Config secrets exposed in JSON after update/doctor | `src/config/io.ts:1027-1271` — partially mitigated by `redactConfigSnapshot()` (PR #9858) + env var reference preservation (commit `f59df9589`) |
-| [#9813](https://github.com/openclaw/openclaw/issues/9813) | ~~HIGH~~ FIXED (DUP #9627) | Gateway expands ${ENV_VAR} on meta writeback | Closed upstream as COMPLETED (2026-02-13); `src/config/io.ts:1027-1271` — partially mitigated by `redactConfigSnapshot()` (PR #9858) + env var reference preservation (commit `f59df9589`); root cause still open in #9627 |
-| [#11126](https://github.com/openclaw/openclaw/issues/11126) | HIGH (DUP #9627, WONTFIX) | Config write paths resolve ${VAR} to cleartext | Closed upstream as NOT_PLANNED (2026-02-13); same as #9627/#9813 — `src/config/io.ts:1027-1271` |
+| [#9627](https://github.com/openclaw/openclaw/issues/9627) | HIGH | Config secrets exposed in JSON after update/doctor | `src/config/io.ts:1036-1271` — partially mitigated by `redactConfigSnapshot()` (PR #9858) + env var reference preservation (commit `f59df9589`) |
+| [#9813](https://github.com/openclaw/openclaw/issues/9813) | ~~HIGH~~ FIXED (DUP #9627) | Gateway expands ${ENV_VAR} on meta writeback | Closed upstream as COMPLETED (2026-02-13); `src/config/io.ts:1036-1271` — partially mitigated by `redactConfigSnapshot()` (PR #9858) + env var reference preservation (commit `f59df9589`); root cause still open in #9627 |
+| [#11126](https://github.com/openclaw/openclaw/issues/11126) | HIGH (DUP #9627, WONTFIX) | Config write paths resolve ${VAR} to cleartext | Closed upstream as NOT_PLANNED (2026-02-13); same as #9627/#9813 — `src/config/io.ts:1036-1271` |
 | [#9795](https://github.com/openclaw/openclaw/issues/9795) | LOW | sanitizeMimeType regex not end-anchored (by design) | `src/media-understanding/apply.ts:96-106` |
 | [#9792](https://github.com/openclaw/openclaw/issues/9792) | INVALID | validateHostEnv skips baseEnv (by design) | `src/agents/bash-tools.exec-runtime.ts:34` (definition) + `src/agents/bash-tools.exec.ts:330` (call) |
 | [#9791](https://github.com/openclaw/openclaw/issues/9791) | INVALID (CLOSED) | Fullwidth marker bypass (fold is length-preserving) | Closed upstream (COMPLETED 2026-02-15); `src/security/external-content.ts:127-167` |
@@ -44,7 +44,7 @@
 | [#5123](https://github.com/openclaw/openclaw/issues/5123) | ~~MEDIUM (WONTFIX)~~ FIXED LOCALLY | ReDoS in session filter regex | Closed upstream NOT_PLANNED (2026-02-17); fixed locally by `a2dfe9879` (Feb 24 sync 7): `matchSessionFilter()` now uses `compileSafeRegex()` at `src/infra/exec-approval-forwarder.ts:58-66` |
 | [#5124](https://github.com/openclaw/openclaw/issues/5124) | ~~MEDIUM~~ FIXED | ReDoS in log redaction patterns | Fixed upstream (COMPLETED 2026-02-14); `src/logging/redact.ts:50-60` |
 | [#6021](https://github.com/openclaw/openclaw/issues/6021) | MEDIUM (WONTFIX) | Timing attack in non-gateway token comparisons | Closed upstream as NOT_PLANNED (2026-02-13); partially mitigated locally (hook token + device pairing use `safeEqualSecret`); `src/infra/node-pairing.ts:277` still uses `===` |
-| [#7862](https://github.com/openclaw/openclaw/issues/7862) | ~~MEDIUM~~ FIXED | Session transcripts 644 instead of 600 (fixed upstream and locally) | Fixed upstream COMPLETED (2026-02-16); 0o600 fix applied upstream; `src/auto-reply/reply/session.ts:96`, `src/agents/pi-embedded-runner/session-manager-init.ts`, `src/gateway/server-methods/sessions.ts:666` |
+| [#7862](https://github.com/openclaw/openclaw/issues/7862) | ~~MEDIUM~~ FIXED | Session transcripts 644 instead of 600 (fixed upstream and locally) | Fixed upstream COMPLETED (2026-02-16); 0o600 fix applied upstream; `src/auto-reply/reply/session.ts:96`, `src/agents/pi-embedded-runner/session-manager-init.ts`, `src/gateway/server-methods/sessions.ts:687` |
 | [#8027](https://github.com/openclaw/openclaw/issues/8027) | ~~MEDIUM~~ FIXED | web_fetch hidden text prompt injection | Fixed upstream (COMPLETED); `src/agents/tools/web-fetch-utils.ts:59-61` |
 | [#8592](https://github.com/openclaw/openclaw/issues/8592) | ~~MEDIUM~~ FIXED | No detection of encoded/obfuscated commands | Fixed upstream (COMPLETED); `src/infra/exec-safety.ts:1-44` |
 | [#8588](https://github.com/openclaw/openclaw/issues/8588) | MEDIUM | Sensitive config files accessible when sandbox is home dir | `src/agents/sandbox/context.ts:42-49` (workspaceAccess=rw) |
@@ -60,8 +60,8 @@
 | [#10333](https://github.com/openclaw/openclaw/issues/10333) | ~~MEDIUM~~ FIXED | BlueBubbles filename multipart header injection | Fixed in PR [#11093](https://github.com/openclaw/openclaw/pull/11093) — `sanitizeFilename()` at `extensions/bluebubbles/src/attachments.ts:27-29` |
 | [#10646](https://github.com/openclaw/openclaw/issues/10646) | HIGH (WONTFIX) | Weak UUID: Math.random() fallback + tool call IDs | Closed upstream as NOT_PLANNED (2026-02-24); still affects local code at `ui/src/ui/uuid.ts:23-33` (fallback), `src/auto-reply/reply/get-reply-inline-actions.ts:191` (toolCallId) |
 | [#7139](https://github.com/openclaw/openclaw/issues/7139) | ~~MEDIUM~~ FIXED | Default config: sandbox off, plaintext creds | Fixed upstream (COMPLETED); `src/agents/sandbox/config.ts:166` — sandbox default changed |
-| [#9875](https://github.com/openclaw/openclaw/issues/9875) | MEDIUM | Orphaned tool_use blocks from backgrounded exec | `src/agents/session-transcript-repair.ts:212-364` (reactive repair, not proactive) |
-| [#11900](https://github.com/openclaw/openclaw/issues/11900) | MEDIUM | Context files (USER.md, SOUL.md) loaded for all senders | `src/agents/bootstrap-files.ts:44-70` — no `senderIsOwner` check; `attempt.ts:479` calls unconditionally |
+| [#9875](https://github.com/openclaw/openclaw/issues/9875) | MEDIUM | Orphaned tool_use blocks from backgrounded exec | `src/agents/session-transcript-repair.ts:342` (reactive repair, not proactive) |
+| [#11900](https://github.com/openclaw/openclaw/issues/11900) | MEDIUM | Context files (USER.md, SOUL.md) loaded for all senders | `src/agents/bootstrap-files.ts:64-96` — no `senderIsOwner` check; `attempt.ts:536` calls unconditionally |
 | [#12571](https://github.com/openclaw/openclaw/issues/12571) | MEDIUM (WONTFIX) | Session isolation leak in cron jobs after ~24h | Closed upstream as NOT_PLANNED; still affects local code at `src/cron/service/jobs.ts` — isolated sessions leak to main session after extended runtime |
 | [#11832](https://github.com/openclaw/openclaw/issues/11832) | ~~MEDIUM~~ FIXED | Per-agent tools.exec config not applied | Fixed upstream (COMPLETED); `src/auto-reply/reply/get-reply-directives.ts:66-81` |
 | [#12541](https://github.com/openclaw/openclaw/issues/12541) | LOW (WONTFIX) | Voice-call webhook spoofing via signature bypass config | Closed upstream as NOT_PLANNED; still affects local code at `extensions/voice-call/src/config.ts` — `skipSignatureVerification` disables HMAC-SHA256; opt-in, not default |
@@ -78,7 +78,7 @@
 | [#11431](https://github.com/openclaw/openclaw/issues/11431) | ~~CRITICAL~~ FIXED | Hook/plugin npm install runs lifecycle scripts (no --ignore-scripts) | Fixed in PRs: `92702af7a` (plugins+hooks, Feb 12 sync 1) + [#14659](https://github.com/openclaw/openclaw/pull/14659) (skills, Feb 13 sync 1) — `--ignore-scripts` added to all install commands |
 | [#11023](https://github.com/openclaw/openclaw/issues/11023) | HIGH (WONTFIX) | Sandbox browser bridge started without auth token | Closed upstream as NOT_PLANNED (2026-02-13); `startBrowserBridgeServer` called at `src/agents/sandbox/browser.ts:355-366` WITH `authToken` and `authPassword` (line ref updated Mar 1 sync 1; auth IS present); relates to #6609 |
 | [#11945](https://github.com/openclaw/openclaw/issues/11945) | HIGH (WONTFIX) | config.patch bypasses commands.restart restriction | Closed upstream as NOT_PLANNED (2026-02-13); still affects local code at `src/gateway/server-methods/config.ts:330` |
-| [#13683](https://github.com/openclaw/openclaw/issues/13683) | ~~HIGH~~ FIXED | CLI `config get` returns unredacted secrets to sandboxed agents | Fixed upstream (COMPLETED 2026-02-14); `src/cli/config-cli.ts:277-278` |
+| [#13683](https://github.com/openclaw/openclaw/issues/13683) | ~~HIGH~~ FIXED | CLI `config get` returns unredacted secrets to sandboxed agents | Fixed upstream (COMPLETED 2026-02-14); `src/cli/config-cli.ts:293-298` |
 | [#13786](https://github.com/openclaw/openclaw/issues/13786) | ~~HIGH~~ FIXED | BlueBubbles webhook auth bypass via loopback proxy trust | Fixed in PR [#13787](https://github.com/openclaw/openclaw/pull/13787) — loopback bypass removed; all requests require password auth |
 | [#13718](https://github.com/openclaw/openclaw/issues/13718) | ~~HIGH~~ FIXED | Unauthenticated Nostr profile API allows remote config tampering | Fixed in PR [#13719](https://github.com/openclaw/openclaw/pull/13719) — gateway-auth required for `/api/channels/` plugin routes (`server-http.ts:542-554`) |
 | [#13937](https://github.com/openclaw/openclaw/issues/13937) | ~~MEDIUM~~ FIXED | HTML not escaped in Control UI webchat (XSS) | Closed as COMPLETED 2026-02-11; `ui/` webchat HTML escaping fix applied upstream |
@@ -103,7 +103,7 @@
 | [#24693](https://github.com/openclaw/openclaw/issues/24693) | MEDIUM | Hook completion events leak cross-agent via mainSessionKey routing | `src/gateway/server/hooks.ts:77-78,86-87` — completion events routed to `mainSessionKey` instead of hook's target `agentId` (available at line 39 but unused) |
 | [#25712](https://github.com/openclaw/openclaw/issues/25712) | MEDIUM | Multi-agent media isolation: inbound files shared across agents | `src/media/store.ts:13,307` — `resolveMediaDir()` is global (no per-agent namespacing); all agents share `~/.openclaw/media/inbound/` directory; cross-agent file reads possible |
 | [#25714](https://github.com/openclaw/openclaw/issues/25714) | MEDIUM | Webchat UI cross-session tool data flash (UI state race) | `ui/src/ui/app-tool-stream.ts` — prior session's tool stream buffers not cleared before new session renders; causes brief cross-session data flash in webchat |
-| [#12173](https://github.com/openclaw/openclaw/issues/12173) | ~~MEDIUM~~ FIXED | apply_patch tool path traversal when sandbox disabled | Fixed by `5544646a0` — `resolvePatchPath()` now calls `assertSandboxPath()` at `src/agents/apply-patch.ts:254` regardless of sandbox mode; further hardened by `5e7c3250c` adding `workspaceOnly` guards |
+| [#12173](https://github.com/openclaw/openclaw/issues/12173) | ~~MEDIUM~~ FIXED | apply_patch tool path traversal when sandbox disabled | Fixed by `5544646a0` — `resolvePatchPath()` now calls `assertSandboxPath()` at `src/agents/apply-patch.ts:297,314` regardless of sandbox mode; further hardened by `5e7c3250c` adding `workspaceOnly` guards |
 | [#10659](https://github.com/openclaw/openclaw/issues/10659) | ENHANCEMENT | Feature: Masked secrets to prevent agent reading raw API keys | Enhancement request; relates to #10033 (secrets management) |
 | [#9325](https://github.com/openclaw/openclaw/issues/9325) | NOT APPLICABLE | Skill removal without notification | ClawHub platform moderation issue, not a codebase vulnerability |
 | [#11879](https://github.com/openclaw/openclaw/issues/11879) | NOT APPLICABLE | Malicious ClawHub skill exfiltrating to Feishu | Ecosystem/marketplace issue; 13,981 installs; relates to #10890 (Skill Security Framework) |
@@ -120,8 +120,8 @@
 |-------|----------|----------|---------|--------------|
 | [#7903](https://github.com/openclaw/openclaw/issues/7903) | CRITICAL | AUTONOMY_CONTROL | Self-talk detection runs AFTER tool execution, not before | `src/auto-reply/` — no pre-execution self-talk check; safety validation occurs post-action |
 | [#24884](https://github.com/openclaw/openclaw/issues/24884) | HIGH | CONTEXT_MGMT | Orphaned tool_use IDs after context compaction break all providers | `src/agents/session-transcript-repair.ts` — `repairToolUseResultPairing()` insufficient for compaction scenarios; cross-ref #9875 |
-| [#24852](https://github.com/openclaw/openclaw/issues/24852) | ~~HIGH~~ FIXED | PERSONA_DRIFT | Subagent sessions don't load SOUL.md/workspace files | Fixed upstream (COMPLETED 2026-02-24); `src/agents/bootstrap-files.ts:72` — subagent bootstrap now received via `resolveBootstrapContextForRun()`; cross-ref #11900 |
-| [#21597](https://github.com/openclaw/openclaw/issues/21597) | HIGH | AUTONOMY_CONTROL | Heartbeat unbounded tool-call loops burn tokens | `src/agents/pi-embedded-runner/run.ts:799` — compaction cycle guard exists but no tool-call loop guard for heartbeat path |
+| [#24852](https://github.com/openclaw/openclaw/issues/24852) | ~~HIGH~~ FIXED | PERSONA_DRIFT | Subagent sessions don't load SOUL.md/workspace files | Fixed upstream (COMPLETED 2026-02-24); `src/agents/bootstrap-files.ts:98` — subagent bootstrap now received via `resolveBootstrapContextForRun()`; cross-ref #11900 |
+| [#21597](https://github.com/openclaw/openclaw/issues/21597) | HIGH | AUTONOMY_CONTROL | Heartbeat unbounded tool-call loops burn tokens | `src/agents/pi-embedded-runner/run.ts:944` — compaction cycle guard exists but no tool-call loop guard for heartbeat path |
 | [#21621](https://github.com/openclaw/openclaw/issues/21621) | HIGH | CONTEXT_MGMT | Browser tool triggers compaction deadlock | `src/agents/pi-embedded-runner/compact.ts` — browser tool output can trigger compaction which deadlocks on tool completion |
 | [#10649](https://github.com/openclaw/openclaw/issues/10649) | HIGH | CONTEXT_MGMT | Unexplained data appears after context compaction | `src/agents/pi-embedded-runner/compact.ts` — data integrity not fully verified post-compaction |
 | [#18223](https://github.com/openclaw/openclaw/issues/18223) | HIGH | CONTEXT_MGMT | Compaction SIGKILLs in-flight exec tool processes | `src/agents/pi-embedded-runner/compact.ts` — compaction can terminate running tool processes mid-execution |
@@ -135,7 +135,7 @@
 | [#21084](https://github.com/openclaw/openclaw/issues/21084) | MEDIUM | HALLUCINATION | Session JSONL not persisted on crash (data loss) | `src/auto-reply/reply/session.ts` — crash during write loses session transcript; no fsync/WAL |
 | [#25795](https://github.com/openclaw/openclaw/issues/25795) | MEDIUM | CONTEXT_MGMT | Suspicious 'System: Post-Compaction Audit' injected into conversation — potential prompt injection surface | `src/agents/pi-extensions/compaction-safeguard.ts` — post-compaction audit injects System: prefixed message; same format as tracked #21656 spoofing surface; `DEFAULT_REQUIRED_READS` instructs reading nonexistent files |
 | [#25647](https://github.com/openclaw/openclaw/issues/25647) | MEDIUM | TOOL_CALL | transcript-sanitize pi-extension never loaded — orphaned tool_result possible via extension path | `src/agents/pi-embedded-runner/extensions.ts:6-11` — only compactionSafeguard + contextPruning loaded; `repairToolUseResultPairing` runs via direct import in `compaction.ts:373` but extension activation path is broken |
-| [#25392](https://github.com/openclaw/openclaw/issues/25392) | MEDIUM | CONTEXT_MGMT | Default AGENTS.md template headings mismatch compaction code — critical context lost after every compaction | `src/agents/pi-extensions/compaction-safeguard.ts:177` extracts `"Session Startup"` + `"Red Lines"`; `src/agents/system-prompt.ts:383` generates `"## Safety"` — template mismatch causes silent context extraction failure |
+| [#25392](https://github.com/openclaw/openclaw/issues/25392) | MEDIUM | CONTEXT_MGMT | Default AGENTS.md template headings mismatch compaction code — critical context lost after every compaction | `src/agents/pi-extensions/compaction-safeguard.ts:177` extracts `"Session Startup"` + `"Red Lines"`; `src/agents/system-prompt.ts:390` generates `"## Safety"` — template mismatch causes silent context extraction failure |
 
 ### Category Tags
 
@@ -258,12 +258,12 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** Playwright download helpers use the server's suggested filename without sanitization, allowing path traversal writes outside `/tmp/openclaw/downloads`. A malicious `Content-Disposition` header like `filename=../../../../../etc/passwd` can write files to arbitrary locations.
 
 **Affected code:**
-- `src/browser/pw-tools-core.downloads.ts:20-48` - `sanitizeDownloadFileName()` now applies `path.posix.basename()` + `path.win32.basename()` + control char stripping (hardened Feb 15 sync 2)
-- `src/browser/pw-tools-core.downloads.ts:50` - `buildTempDownloadPath()` calls `sanitizeDownloadFileName()`
+- `src/browser/pw-tools-core.downloads.ts:22` - `sanitizeUntrustedFileName()` (from `safe-filename.js`) applies `path.posix.basename()` + `path.win32.basename()` + control char stripping (hardened Feb 15 sync 2; function renamed from `sanitizeDownloadFileName` in Mar 2 sync 7)
+- `src/browser/pw-tools-core.downloads.ts:24-28` - `buildTempDownloadPath()` calls `sanitizeUntrustedFileName()`
 - `src/browser/pw-tools-core.downloads.ts:212-213` - `suggestedFilename()` now sanitized before use
 
 **Verification (post-hardening):**
-- `sanitizeDownloadFileName()` applies dual `path.basename()` (posix + win32) and strips control chars
+- `sanitizeUntrustedFileName()` applies dual `path.basename()` (posix + win32) and strips control chars
 - Traversal via `../` in filenames is now blocked
 
 ### #9512: Skill Download Archive Path Traversal
@@ -292,8 +292,8 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** Gateway HTTP server serves Canvas host and A2UI endpoints without enforcing gateway auth, allowing unauthenticated access to canvas files.
 
 **Affected code:**
-- `src/gateway/server-http.ts:586-609` - Canvas/A2UI handler dispatch (now auth-wrapped via `authorizeCanvasRequest()` at `:168-216`, PR #9518)
-- `src/gateway/server-http.ts:664-689` - WebSocket upgrade for canvas (now auth-wrapped via `authorizeCanvasRequest()` at `:670`, PR #9518)
+- `src/gateway/server-http.ts:431-454` - Canvas/A2UI handler dispatch (now auth-wrapped via `authorizeCanvasRequest()` at `src/gateway/server/http-auth.ts:58`, PR #9518)
+- `src/gateway/server-http.ts:518-551` - WebSocket upgrade for canvas (now auth-wrapped via `authorizeCanvasRequest()` at `server-http.ts:535`, PR #9518)
 
 **Verification:**
 - No `authorizeGatewayConnect` call before `canvasHost.handleHttpRequest(req, res)`
@@ -318,8 +318,8 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** Browser control server binds to `127.0.0.1` but performs no Host header validation. DNS rebinding attacks can bypass localhost restriction to reach browser automation endpoints from a remote origin.
 
 **Affected code:**
-- `src/browser/server.ts:59` - binds to `"127.0.0.1"` (middleware extracted to `src/browser/server-middleware.ts:24-35`)
-- `src/browser/server.ts:25-136` - auth now required via `isAuthorizedBrowserRequest()` (commit `9230a2ae1`, refactored in `28014de97`), but still no Host header or origin validation
+- `src/browser/server.ts:66` - binds to `"127.0.0.1"` (middleware extracted to `src/browser/server-middleware.ts:24-35`)
+- `src/browser/server.ts:21-91` - auth now required via `isAuthorizedBrowserRequest()` (commit `9230a2ae1`, refactored in `28014de97`), but still no Host header or origin validation
 
 **Partial mitigation (Feb 13 sync 5):** Commit `9230a2ae1` adds bearer token / password auth middleware to all browser control HTTP routes. DNS rebinding still possible but requests now need valid authentication credentials, significantly raising the bar. New `browser.control_no_auth` audit check flags when no auth is configured.
 
@@ -421,7 +421,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Local status:** NOT FIXED — the 0o600 fix was applied in `ae0b110e4` but accidentally reverted by `9f261f592 revert: PR 18288 accidental merge`. Three sites remain unpatched:
 - `src/auto-reply/reply/session.ts:96` - `fs.writeFileSync(sessionFile, ..., "utf-8")` (no mode)
 - `src/agents/pi-embedded-runner/session-manager-init.ts` - no mode on session file reset
-- `src/gateway/server-methods/sessions.ts:666` - `fs.writeFileSync(filePath, ..., "utf-8")` (no mode)
+- `src/gateway/server-methods/sessions.ts:687` - `fs.writeFileSync(filePath, ..., "utf-8")` (no mode)
 
 ### #8516: Browser Download/Trace Endpoints Arbitrary File Write
 
@@ -524,9 +524,9 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Severity:** LOW (partially affected)
 **CWE:** CWE-276 (Incorrect Default Permissions)
 
-**Vulnerability:** Code correctly uses `mode: 0o700` for directory creation (`src/config/io.ts:1112`), but when installed via `sudo`, the directory inherits root ownership. Subsequent user-space operations may create group-writable files.
+**Vulnerability:** Code correctly uses `mode: 0o700` for directory creation (`src/config/io.ts:1114`), but when installed via `sudo`, the directory inherits root ownership. Subsequent user-space operations may create group-writable files.
 
-**Note:** This is an operational issue (sudo usage), not a code bug. `src/security/audit.ts:161-178` already detects group-writable state directories.
+**Note:** This is an operational issue (sudo usage), not a code bug. `src/security/audit.ts:219-228` already detects group-writable state directories.
 
 ### #9435: Gateway Auth Token Exposed in URL Query Params
 
@@ -547,11 +547,11 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** When `openclaw doctor` or `openclaw config set` writes the config file, environment variable references (`${VAR}`) are resolved to plaintext values. The write-back serializes resolved secrets to disk in cleartext JSON, destroying the original `${VAR}` references.
 
 **Affected code:**
-- `src/config/io.ts:1027-1271` - `writeConfigFile` now preserves env var references for unchanged paths (commit `f59df9589`), but resolved values still leak for paths that change
+- `src/config/io.ts:1036-1271` - `writeConfigFile` now preserves env var references for unchanged paths (commit `f59df9589`), but resolved values still leak for paths that change
 - `src/config/env-substitution.ts:83-89` - `substituteString` is a one-way transformation
 - `src/commands/doctor.ts:298` - `writeConfigFile(cfg)` writes env-resolved config back to disk
 
-**Detection aid (sync 10):** Commit `748d6821d` adds forensic config write auditing (`src/config/io.ts:489-536`). Every `writeConfigFile` call now appends a `config-audit.jsonl` record with previous/next content hashes and byte sizes. When env vars are expanded to cleartext, the `nextBytes` will exceed `previousBytes` (longer cleartext vs short `${VAR}` refs), and the `suspicious` field flags `size-drop` anomalies for the reverse case. Check `$STATE_DIR/logs/config-audit.jsonl` to trace which process triggered the expansion.
+**Detection aid (sync 10):** Commit `748d6821d` adds forensic config write auditing (`src/config/io.ts:493-536`). Every `writeConfigFile` call now appends a `config-audit.jsonl` record with previous/next content hashes and byte sizes. When env vars are expanded to cleartext, the `nextBytes` will exceed `previousBytes` (longer cleartext vs short `${VAR}` refs), and the `suspicious` field flags `size-drop` anomalies for the reverse case. Check `$STATE_DIR/logs/config-audit.jsonl` to trace which process triggered the expansion.
 
 ### #9813: Gateway Expands ${ENV_VAR} on Meta Writeback (DUPLICATE of #9627)
 
@@ -563,7 +563,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** Same root cause as #9627. When the gateway updates `meta.lastTouchedAt` in the config file, the writeback path resolves `${ENV_VAR}` references to plaintext values, destroying the original references.
 
 **Affected code:**
-- `src/config/io.ts:1027-1271` - `writeConfigFile` now preserves env var references for unchanged paths (commit `f59df9589`), partially mitigating meta writeback expansion
+- `src/config/io.ts:1036-1271` - `writeConfigFile` now preserves env var references for unchanged paths (commit `f59df9589`), partially mitigating meta writeback expansion
 
 **Our analysis:** This is the same `writeConfigFile` code path documented in #9627. The trigger differs (gateway meta writeback vs `doctor`/`config set`), but the underlying bug — env var expansion on write — is identical. Closed as COMPLETED upstream on 2026-02-13 (duplicate closed, root cause tracked in #9627 which remains OPEN).
 
@@ -766,9 +766,9 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **CWE:** CWE-200 (Exposure of Sensitive Information)
 
 **Affected code:**
-- `src/agents/bootstrap-files.ts:44-70` — `resolveBootstrapContextForRun()` loads all bootstrap files unconditionally
-- `src/agents/pi-embedded-runner/run/attempt.ts:479` — calls `resolveBootstrapContextForRun()` without `senderIsOwner`
-- `src/agents/pi-embedded-runner/run/attempt.ts:526` — `senderIsOwner` only passed to `createOpenClawCodingTools()` for tool gating
+- `src/agents/bootstrap-files.ts:64-96` — `resolveBootstrapContextForRun()` loads all bootstrap files unconditionally
+- `src/agents/pi-embedded-runner/run/attempt.ts:536` — calls `resolveBootstrapContextForRun()` without `senderIsOwner`
+- `src/agents/pi-embedded-runner/run/attempt.ts:585` — `senderIsOwner` only passed to `createOpenClawCodingTools()` for tool gating
 
 **Impact:** Non-owner senders on public channels receive responses shaped by the owner's personal context files (personality, preferences, private notes). The content is not directly exposed but indirectly leaks through response behavior. Tool access is correctly gated by `senderIsOwner`, but context/personality files are not.
 
@@ -780,7 +780,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Affected code:**
 - `src/auto-reply/reply/get-reply-directives.ts:66-81` — `resolveExecOverrides()` reads from `directives` (inline `!exec=docker`) and `sessionEntry` only
 - `src/auto-reply/reply/get-reply-directives.ts:93` — `agentCfg: AgentDefaults` is in scope but not consulted for exec settings
-- `src/agents/pi-embedded-runner/run/attempt.ts:510` — `execOverrides` passed to tool creation, but populated only from directives/session
+- `src/agents/pi-embedded-runner/run/attempt.ts:569` — `execOverrides` passed to tool creation, but populated only from directives/session
 
 **Impact:** If an operator configures per-agent exec restrictions (e.g., `agents.mybot.tools.exec.host = "docker"` for sandboxed execution), those restrictions are silently ignored. The agent runs with global exec defaults. Global config still applies; only per-agent overrides are lost.
 
@@ -837,8 +837,8 @@ All changes take effect immediately via automatic restart.
 **Vulnerability:** The CLI `openclaw config get` command reads and outputs resolved config values (including secrets from `${ENV_VAR}` substitution) without applying the redaction system. The gateway RPC `config.get` handler correctly redacts via `redactConfigSnapshot()`, but the CLI path bypasses this entirely. A sandboxed agent with exec access can extract any API key configured via env var substitution.
 
 **Affected code:**
-- `src/cli/config-cli.ts:277-278` — `loadValidConfig()` returns resolved `snapshot.config`; `getAtPath()` reads values directly
-- `src/cli/config-cli.ts:277-288` — output paths (`defaultRuntime.log`) emit unredacted values
+- `src/cli/config-cli.ts:293-298` — `loadValidConfig()` returns resolved `snapshot.config`; `getAtPath()` reads values directly
+- `src/cli/config-cli.ts:293-299` — output paths (`defaultRuntime.log`) emit unredacted values
 
 **Correct implementation (for comparison):**
 - `src/gateway/server-methods/config.ts:214` — RPC handler calls `redactConfigSnapshot(snapshot)` before `respond()`
@@ -963,7 +963,7 @@ All changes take effect immediately via automatic restart.
 **Verification:**
 - `src/channels/command-gating.ts:8` defines `resolveCommandAuthorizedFromAuthorizers()`
 - 16 other channel implementations all use dynamic `commandAuthorized` computation
-- `src/gateway/server-methods/chat.ts:484` also hardcodes `true` but is gateway-auth protected (owner-facing webchat, expected behavior)
+- `src/gateway/server-methods/chat.ts:834` also hardcodes `true` but is gateway-auth protected (owner-facing webchat, expected behavior)
 
 **Impact:** Any Feishu user can execute admin/control commands (e.g., `/model`, `/new`, `/reset`, `/elevated`) regardless of access group configuration. Requires Feishu channel to be enabled with access groups configured. Without access groups, all users are already allowed, so this only affects Feishu deployments with access restrictions.
 
@@ -1054,10 +1054,10 @@ All changes take effect immediately via automatic restart.
 **Vulnerability:** `resolvePatchPath()` has two code paths. When `sandboxRoot` is set, it calls `assertSandboxPath()` (secure). When `sandboxRoot` is `undefined` (gateway/non-sandboxed mode), it falls through to `resolvePathFromCwd()` which accepts absolute paths and normalizes `../` via `path.resolve()` with zero containment checks. Default sandbox mode is "off" (`src/agents/sandbox/config.ts:166`).
 
 **Affected code:**
-- `src/agents/apply-patch.ts:253-292` — `resolvePatchPath()` function
-- Lines 258-274: sandbox path (secure, calls `assertSandboxPath`)
-- Lines 277-291: non-sandbox path (workspaceOnly-guarded, calls `assertSandboxPath` when enabled)
-- Called at lines 141, 149, 155, 159 for add/delete/update/move patch operations
+- `src/agents/apply-patch.ts:286-327` — `resolvePatchPath()` function
+- Lines 291-308: sandbox path (secure, calls `assertSandboxPath` at :297)
+- Lines 311-326: non-sandbox path (workspaceOnly-guarded, calls `assertSandboxPath` at :314 when enabled)
+- Called at lines 154, 162, 168, 174 for add/delete/update/move patch operations
 
 **Mitigation note:** When sandbox is disabled, the exec tool already has unrestricted file access. This is an additional vector (apply_patch vs exec) but does not expand the attack surface beyond what exec provides. Severity is MEDIUM rather than HIGH because it does not bypass a security boundary that is otherwise enforced.
 
@@ -1202,7 +1202,7 @@ All changes take effect immediately via automatic restart.
 
 **Affected code:**
 - `src/infra/outbound/message-action-runner.ts` — no `allowedRecipients`, `dmScope` filter, or per-agent channel restriction
-- `src/agents/tools/message-tool.ts:450` — `sendAttachment` action has no cross-tenant recipient restriction
+- `src/agents/tools/message-tool.ts:704` — `sendAttachment` action has no cross-tenant recipient restriction
 - No grep matches for `allowedRecipients`, `restrictSend`, `sendScope`, `channelFilter`, `recipientFilter` in the message pipeline
 
 **Impact:** A malicious or prompt-injected agent can impersonate the bot to any user, deliver prompt injection payloads to other users' sessions, and enumerate all connected users. Single-user setups are unaffected.

@@ -44,10 +44,10 @@ The Cisco blog post identifies four risk categories for OpenClaw deployments and
 
 **What the code actually does:**
 
-1. **File permissions** (`src/infra/fs-safe.ts:43-44`) — files opened with `O_NOFOLLOW` on non-Windows platforms, blocking symlink-based exfiltration
-2. **Symlink protection** (`src/infra/fs-safe.ts:76-78, 83-85`) — double-checked via `isSymlinkOpenError()` catch and explicit `lstat().isSymbolicLink()` check
+1. **File permissions** (`src/infra/fs-safe.ts:48-49`) — files opened with `O_NOFOLLOW` on non-Windows platforms, blocking symlink-based exfiltration
+2. **Symlink protection** (`src/infra/fs-safe.ts:97-99,109-111`) — double-checked via `isSymlinkOpenError()` catch and explicit `lstat().isSymbolicLink()` check
 3. **Path traversal prevention** (`src/pairing/pairing-store.ts:53-62`) — `safeChannelKey()` strips `../`, `/`, `\`, and other path traversal characters
-4. **Root escape prevention** (`src/infra/fs-safe.ts:119-138`) — `openFileWithinRoot()` verifies resolved path stays within root directory
+4. **Root escape prevention** (`src/infra/fs-safe.ts:166-199`) — `openFileWithinRoot()` verifies resolved path stays within root directory
 5. **Known gap:** credentials are stored as JSON without encryption at rest (acknowledged; mitigated by 0o600 and OS-level controls)
 
 **Verdict:** PARTIALLY TRUE — plaintext storage is a real defense-in-depth gap (also flagged by CVE-2026-25253, now patched for the path traversal vector). The file permission enforcement and symlink blocking are robust, but encryption at rest would be stronger.
@@ -190,7 +190,7 @@ Source: `src/agents/workspace.ts:32-33` (file list), `src/agents/pi-embedded-hel
 
 **Path 2 — Memory directory files (tool-call injection, lower trust):**
 
-Files in `memory/*.md` are **not** loaded by `loadWorkspaceBootstrapFiles()`. They go through a separate pipeline: `listMemoryFiles()` (`src/memory/internal.ts:78-107`) and `resolveDefaultCollections()` (`src/memory/backend-config.ts:275`), accessed via `memory_search`/`memory_get` tool calls with a 4,000-character injection budget — not as system prompt context. The QMD backend validates `.md` extension and rejects symlinks (`src/memory/qmd-manager.ts:620-624`) but does **not** scan content.
+Files in `memory/*.md` are **not** loaded by `loadWorkspaceBootstrapFiles()`. They go through a separate pipeline: `listMemoryFiles()` (`src/memory/internal.ts:78-107`) and `resolveDefaultCollections()` (`src/memory/backend-config.ts:275`), accessed via `memory_search`/`memory_get` tool calls with a 4,000-character injection budget — not as system prompt context. The QMD backend does **not** scan content.
 
 **Neither path is scanned by the built-in skill scanner** (`src/security/skill-scanner.ts:38-47`), which only processes JS/TS files.
 
