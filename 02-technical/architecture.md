@@ -91,7 +91,7 @@ Docs: https://docs.openclaw.ai/gateway/configuration
 
 ### Input sanitization
 
-`src/gateway/chat-sanitize.ts` strips platform envelope metadata (WhatsApp headers, message IDs, control characters) from user messages before processing. `sanitizeChatSendMessageInput()` (`src/gateway/server-methods/chat.ts:84`) rejects null bytes and strips disallowed control characters, allowing only tabs, newlines, carriage returns, and printable characters through.
+`src/gateway/chat-sanitize.ts` strips platform envelope metadata (WhatsApp headers, message IDs, control characters) from user messages before processing. `sanitizeChatSendMessageInput()` (`src/gateway/server-methods/chat.ts:85`) rejects null bytes and strips disallowed control characters, allowing only tabs, newlines, carriage returns, and printable characters through.
 
 ### Config merge-patch
 
@@ -124,6 +124,9 @@ Docs: https://docs.openclaw.ai/gateway/configuration
 
 ### Daemon
 - `src/daemon/` (~37 files as of Feb 2026). Cross-platform service management: systemd (Linux), launchd (macOS), schtasks (Windows). Handles Gateway lifecycle as a background service.
+
+### Docs
+- `src/docs/`. Documentation system helpers and utilities.
 
 ### Memory
 - `src/memory/`. Persistent knowledge layer with SQLite + sqlite-vec storage, markdown chunking, embedding providers, hybrid search. (Detailed in [`resource-usage.md` Section F](../06-optimizations/resource-usage.md#f-how-openclaw-memory-works-architecture-deep-dive).)
@@ -169,7 +172,7 @@ Below is a conceptual pipeline. Exact details vary by channel.
 
 1.5) **Input sanitization**
 - Strip platform envelope metadata from user messages (`src/gateway/chat-sanitize.ts`)
-- Reject null bytes and strip unsafe control characters (`src/gateway/server-methods/chat.ts:84`)
+- Reject null bytes and strip unsafe control characters (`src/gateway/server-methods/chat.ts:85`)
 
 2) **Identity + authorization**
 - Resolve sender identity.
