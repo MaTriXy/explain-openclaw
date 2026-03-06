@@ -61,7 +61,7 @@
 | [#10646](https://github.com/openclaw/openclaw/issues/10646) | HIGH (WONTFIX) | Weak UUID: Math.random() fallback + tool call IDs | Closed upstream as NOT_PLANNED (2026-02-24); still affects local code at `ui/src/ui/uuid.ts:23-33` (fallback), `src/auto-reply/reply/get-reply-inline-actions.ts:191` (toolCallId) |
 | [#7139](https://github.com/openclaw/openclaw/issues/7139) | ~~MEDIUM~~ FIXED | Default config: sandbox off, plaintext creds | Fixed upstream (COMPLETED); `src/agents/sandbox/config.ts:166` — sandbox default changed |
 | [#9875](https://github.com/openclaw/openclaw/issues/9875) | MEDIUM | Orphaned tool_use blocks from backgrounded exec | `src/agents/session-transcript-repair.ts:342` (reactive repair, not proactive) |
-| [#11900](https://github.com/openclaw/openclaw/issues/11900) | MEDIUM | Context files (USER.md, SOUL.md) loaded for all senders | `src/agents/bootstrap-files.ts:64-96` — no `senderIsOwner` check; `attempt.ts:604` calls unconditionally |
+| [#11900](https://github.com/openclaw/openclaw/issues/11900) | MEDIUM | Context files (USER.md, SOUL.md) loaded for all senders | `src/agents/bootstrap-files.ts:64-96` — no `senderIsOwner` check; `attempt.ts:735` calls unconditionally |
 | [#12571](https://github.com/openclaw/openclaw/issues/12571) | MEDIUM (WONTFIX) | Session isolation leak in cron jobs after ~24h | Closed upstream as NOT_PLANNED; still affects local code at `src/cron/service/jobs.ts` — isolated sessions leak to main session after extended runtime |
 | [#11832](https://github.com/openclaw/openclaw/issues/11832) | ~~MEDIUM~~ FIXED | Per-agent tools.exec config not applied | Fixed upstream (COMPLETED); `src/auto-reply/reply/get-reply-directives.ts:66-81` |
 | [#12541](https://github.com/openclaw/openclaw/issues/12541) | LOW (WONTFIX) | Voice-call webhook spoofing via signature bypass config | Closed upstream as NOT_PLANNED; still affects local code at `extensions/voice-call/src/config.ts` — `skipSignatureVerification` disables HMAC-SHA256; opt-in, not default |
@@ -73,7 +73,7 @@
 | [#10033](https://github.com/openclaw/openclaw/issues/10033) | ENHANCEMENT (WONTFIX) | Feature: secrets management integration | Closed upstream as NOT_PLANNED (2026-02-13); current state: plaintext creds with 0o600 perms |
 | [#10927](https://github.com/openclaw/openclaw/issues/10927) | ENHANCEMENT (CLOSED) | Random IDs for external content wrapper tags | Closed upstream (COMPLETED); `src/security/external-content.ts:47-48` — static tags; `replaceMarkers()` at `:127-167` already sanitizes injected markers |
 | [#10890](https://github.com/openclaw/openclaw/issues/10890) | ENHANCEMENT (CLOSED) | RFC: Skill Security Framework (manifests, signing, sandboxing) | Closed upstream (COMPLETED); comprehensive proposal for phased skill security; relates to #9512 |
-| [#11437](https://github.com/openclaw/openclaw/issues/11437) | CRITICAL (WONTFIX) | CWD .env → config path override → plugin code exec via jiti | Closed upstream as NOT_PLANNED (2026-02-24); still affects local code at `src/infra/dotenv.ts:10`, `src/config/paths.ts:91-109`, `src/plugins/config-state.ts:73,194` |
+| [#11437](https://github.com/openclaw/openclaw/issues/11437) | CRITICAL (WONTFIX) | CWD .env → config path override → plugin code exec via jiti | Closed upstream as NOT_PLANNED (2026-02-24); still affects local code at `src/infra/dotenv.ts:10`, `src/config/paths.ts:91-109`, `src/plugins/config-state.ts:98,216` |
 | [#11434](https://github.com/openclaw/openclaw/issues/11434) | CRITICAL (WONTFIX) | CWD .env → arbitrary dynamic import via OPENCLAW_BROWSER_CONTROL_MODULE | Closed upstream as NOT_PLANNED (2026-02-24); still affects local code at `src/gateway/server-browser.ts:13-14` — raw `await import(override)` |
 | [#11431](https://github.com/openclaw/openclaw/issues/11431) | ~~CRITICAL~~ FIXED | Hook/plugin npm install runs lifecycle scripts (no --ignore-scripts) | Fixed in PRs: `92702af7a` (plugins+hooks, Feb 12 sync 1) + [#14659](https://github.com/openclaw/openclaw/pull/14659) (skills, Feb 13 sync 1) — `--ignore-scripts` added to all install commands |
 | [#11023](https://github.com/openclaw/openclaw/issues/11023) | HIGH (WONTFIX) | Sandbox browser bridge started without auth token | Closed upstream as NOT_PLANNED (2026-02-13); `startBrowserBridgeServer` called at `src/agents/sandbox/browser.ts:355-366` WITH `authToken` and `authPassword` (line ref updated Mar 1 sync 1; auth IS present); relates to #6609 |
@@ -90,7 +90,7 @@
 | [#11811](https://github.com/openclaw/openclaw/issues/11811) | ~~HIGH~~ FIXED | MSTeams attachment fetch follows redirects before allowlist checks (SSRF) | Fixed upstream (COMPLETED); `extensions/msteams/src/attachments/download.ts:93` |
 | [#15906](https://github.com/openclaw/openclaw/issues/15906) | HIGH | RCE via rogue gateway impersonation (mDNS discovery spoofing) | `apps/android/.../GatewayDiscovery.kt:148-162` (TLS fingerprint stored but not enforced); `apps/macos/.../ShellExecutor.swift:14-32` (unrestricted command exec); partial mitigation via device pairing nonce/challenge |
 | [#15950](https://github.com/openclaw/openclaw/issues/15950) | ~~HIGH~~ FIXED | Android production build permits cleartext traffic globally | Fixed upstream (COMPLETED); `apps/android/.../network_security_config.xml:4` |
-| [#14875](https://github.com/openclaw/openclaw/issues/14875) | ~~HIGH~~ FIXED | Feishu channel hardcodes CommandAuthorized bypassing access groups | Fixed upstream (COMPLETED 2026-02-13); `extensions/feishu/src/bot.ts:1329` |
+| [#14875](https://github.com/openclaw/openclaw/issues/14875) | ~~HIGH~~ FIXED | Feishu channel hardcodes CommandAuthorized bypassing access groups | Fixed upstream (COMPLETED 2026-02-13); `extensions/feishu/src/bot.ts:1330` |
 | [#14117](https://github.com/openclaw/openclaw/issues/14117) | ~~MEDIUM~~ FIXED | Session isolation & message attribution failure | Fixed upstream (COMPLETED 2026-02-14); cross-session message leakage; relates to #12571 |
 | [#14808](https://github.com/openclaw/openclaw/issues/14808) | MEDIUM (WONTFIX, DUP #9627) | apiKey resolved to plaintext in models.json cache | Closed upstream as NOT_PLANNED (2026-02-13); `src/agents/models-config.providers.ts:483` — `normalizeProviders()` includes resolved apiKey; relates to #9627/#13683 |
 | [#11202](https://github.com/openclaw/openclaw/issues/11202) | MEDIUM | Model catalog apiKeys injected into LLM prompt context every turn | `src/agents/models-config.ts` — `normalizeProviders()` includes resolved `apiKey` in model catalog serialized to LLM; all provider keys sent to active provider |
@@ -135,7 +135,7 @@
 | [#21084](https://github.com/openclaw/openclaw/issues/21084) | MEDIUM | HALLUCINATION | Session JSONL not persisted on crash (data loss) | `src/auto-reply/reply/session.ts` — crash during write loses session transcript; no fsync/WAL |
 | [#25795](https://github.com/openclaw/openclaw/issues/25795) | MEDIUM | CONTEXT_MGMT | Suspicious 'System: Post-Compaction Audit' injected into conversation — potential prompt injection surface | `src/agents/pi-extensions/compaction-safeguard.ts` — post-compaction audit injects System: prefixed message; same format as tracked #21656 spoofing surface; `DEFAULT_REQUIRED_READS` instructs reading nonexistent files |
 | [#25647](https://github.com/openclaw/openclaw/issues/25647) | MEDIUM | TOOL_CALL | transcript-sanitize pi-extension never loaded — orphaned tool_result possible via extension path | `src/agents/pi-embedded-runner/extensions.ts:6-11` — only compactionSafeguard + contextPruning loaded; `repairToolUseResultPairing` runs via direct import in `compaction.ts:373` but extension activation path is broken |
-| [#25392](https://github.com/openclaw/openclaw/issues/25392) | ~~MEDIUM~~ FIXED | CONTEXT_MGMT | Default AGENTS.md template headings mismatch compaction code — critical context lost after every compaction | Fixed upstream (96021a2b1 Mar 5 sync 2); `src/agents/pi-extensions/compaction-safeguard.ts:552` now falls back to legacy section names (`"Every Session"`, `"Safety"`) so extraction succeeds regardless of AGENTS.md template version |
+| [#25392](https://github.com/openclaw/openclaw/issues/25392) | ~~MEDIUM~~ FIXED | CONTEXT_MGMT | Default AGENTS.md template headings mismatch compaction code — critical context lost after every compaction | Fixed upstream (96021a2b1 Mar 5 sync 2); `src/agents/pi-extensions/compaction-safeguard.ts:679` now falls back to legacy section names (`"Every Session"`, `"Safety"`) so extraction succeeds regardless of AGENTS.md template version |
 
 ### Category Tags
 
@@ -767,8 +767,8 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 
 **Affected code:**
 - `src/agents/bootstrap-files.ts:64-96` — `resolveBootstrapContextForRun()` loads all bootstrap files unconditionally
-- `src/agents/pi-embedded-runner/run/attempt.ts:604` — calls `resolveBootstrapContextForRun()` without `senderIsOwner`
-- `src/agents/pi-embedded-runner/run/attempt.ts:670` — `senderIsOwner` only passed to `createOpenClawCodingTools()` for tool gating
+- `src/agents/pi-embedded-runner/run/attempt.ts:735` — calls `resolveBootstrapContextForRun()` without `senderIsOwner`
+- `src/agents/pi-embedded-runner/run/attempt.ts:801` — `senderIsOwner` only passed to `createOpenClawCodingTools()` for tool gating
 
 **Impact:** Non-owner senders on public channels receive responses shaped by the owner's personal context files (personality, preferences, private notes). The content is not directly exposed but indirectly leaks through response behavior. Tool access is correctly gated by `senderIsOwner`, but context/personality files are not.
 
@@ -780,7 +780,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Affected code:**
 - `src/auto-reply/reply/get-reply-directives.ts:66-81` — `resolveExecOverrides()` reads from `directives` (inline `!exec=docker`) and `sessionEntry` only
 - `src/auto-reply/reply/get-reply-directives.ts:93` — `agentCfg: AgentDefaults` is in scope but not consulted for exec settings
-- `src/agents/pi-embedded-runner/run/attempt.ts:654` — `execOverrides` passed to tool creation, but populated only from directives/session
+- `src/agents/pi-embedded-runner/run/attempt.ts:785` — `execOverrides` passed to tool creation, but populated only from directives/session
 
 **Impact:** If an operator configures per-agent exec restrictions (e.g., `agents.mybot.tools.exec.host = "docker"` for sandboxed execution), those restrictions are silently ignored. The agent runs with global exec defaults. Global config still applies; only per-agent overrides are lost.
 
@@ -957,7 +957,7 @@ All changes take effect immediately via automatic restart.
 **Affected code (pre-fix):**
 - ~~`extensions/feishu/src/bot.ts:877`~~ — `CommandAuthorized: true` hardcoded in permission error context (lines shifted; fix applied)
 - ~~`extensions/feishu/src/bot.ts:965`~~ — `CommandAuthorized: true` hardcoded in main message context (lines shifted; fix applied)
-- `extensions/feishu/src/bot.ts:1329` — now uses `CommandAuthorized: commandAuthorized` (dynamic, post-fix)
+- `extensions/feishu/src/bot.ts:1330` — now uses `CommandAuthorized: commandAuthorized` (dynamic, post-fix)
 - Zero imports of `resolveCommandAuthorizedFromAuthorizers` in the Feishu extension (pre-fix)
 
 **Verification:**
