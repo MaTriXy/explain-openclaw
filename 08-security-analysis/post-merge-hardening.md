@@ -1,4 +1,4 @@
-> **Navigation:** [Main Guide](../README.md) | [Security Audit Reference](./security-audit-command-reference.md) | [CVEs/GHSAs](./official-security-advisories.md) | [Issue #1796](./issue-1796-argus-audit.md) | [Medium Article](./medium-article-audit.md) | [ZeroLeeks](./zeroleeks-audit.md) | [Post-merge Hardening](./post-merge-hardening.md) | [Open Issues](./open-upstream-issues.md) | [Open PRs](./open-upstream-prs.md) | [Ecosystem Threats](./ecosystem-security-threats.md) | [SecurityScorecard](./securityscorecard-strike-report.md) | [Cisco AI Defense](./cisco-ai-defense-skill-scanner.md) | [Model Poisoning](./model-poisoning-sleeper-agents.md) | [Hudson Rock](./hudson-rock-infostealer-analysis.md) | [Cline Supply Chain](./cline-supply-chain-attack.md) | [Model Comparison](./ai-model-analysis-comparison.md)
+> **Navigation:** [Main Guide](../README.md) | [Security Audit Reference](./security-audit-command-reference.md) | [CVEs/GHSAs](./official-security-advisories.md) | [Issue #1796](./issue-1796-argus-audit.md) | [Medium Article](./medium-article-audit.md) | [ZeroLeeks](./zeroleeks-audit.md) | [Post-merge Hardening](./post-merge-hardening.md) | [Open Issues](./open-upstream-issues.md) | [Open PRs](./open-upstream-prs.md) | [Ecosystem Threats](./ecosystem-security-threats.md) | [SecurityScorecard](./securityscorecard-strike-report.md) | [Cisco AI Defense](./cisco-ai-defense-skill-scanner.md) | [Model Poisoning](./model-poisoning-sleeper-agents.md) | [Hudson Rock](./hudson-rock-infostealer-analysis.md) | [Cline Supply Chain](./cline-supply-chain-attack.md) | [ClawJacked](./clawjacked-attack.md) | [Model Comparison](./ai-model-analysis-comparison.md)
 
 ### Table of Contents
 
@@ -226,6 +226,10 @@
 - [Mar 6 sync 1 (22 commits, 1 security)](./post-merge-hardening/2026-03-06-sync-1.md)
 - [Mar 6 sync 2 (21 commits, 6 security)](./post-merge-hardening/2026-03-06-sync-2.md)
 - [Mar 6 sync 3 (22 commits, 8 security)](./post-merge-hardening/2026-03-06-sync-3.md)
+- [Mar 7 sync 1 (60 commits, 16 security)](./post-merge-hardening/2026-03-07-sync-1.md)
+- [Mar 7 sync 2 (24 commits, 2 security)](./post-merge-hardening/2026-03-07-sync-2.md)
+- [Mar 7 sync 3 (23 commits, 1 security)](./post-merge-hardening/2026-03-07-sync-3.md)
+- [Mar 7 sync 4 (39 commits, 5 security)](./post-merge-hardening/2026-03-07-sync-4.md)
 
 ## Post-Merge Security Hardening
 
