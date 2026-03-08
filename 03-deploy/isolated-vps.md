@@ -724,13 +724,13 @@ Open the Dashboard URL from the welcome message in your browser. The URL include
 **WhatsApp:**
 
 ```bash
-/opt/clawdbot-cli.sh channels add
+openclaw channels add
 # Select WhatsApp -> scan the QR code with your phone
 ```
 
 **Telegram:**
 
-1. Run `/opt/clawdbot-cli.sh channels add` and select Telegram
+1. Run `openclaw channels add` and select Telegram
 2. Open Telegram -> chat with @BotFather -> send `/newbot`
 3. Follow prompts to create your bot and get a token
 4. Paste the bot token back into the CLI
@@ -1283,7 +1283,7 @@ Several security-relevant config options exist but aren't enabled by default. Th
 | `gateway.auth.mode: "token"` | Require bearer token for all requests ([docs](https://docs.openclaw.ai/gateway/security)) |
 | `gateway.trustedProxies: ["127.0.0.1"]` | Required if using reverse proxy — prevents X-Forwarded-For spoofing ([docs](https://docs.openclaw.ai/gateway/security)) |
 | `dangerouslyDisableDeviceAuth: false` | Prevents silently weakening auth |
-| `browser.evaluateEnabled: false` | Disables arbitrary JS execution in browser context (`src/config/types.browser.ts:34`) |
+| `browser.evaluateEnabled: false` | Disables arbitrary JS execution in browser context (`src/config/types.browser.ts:36`) |
 | `plugins.enabled: false` | Avoids plugin HTTP route auth bypass ([#8512](https://github.com/openclaw/openclaw/issues/8512)) |
 | `agents.defaults.sandbox.mode: "all"` | All sessions run in Docker sandbox ([docs](https://docs.openclaw.ai/gateway/sandboxing)) |
 | `agents.defaults.sandbox.workspaceAccess: "ro"` | Read-only workspace prevents file tampering ([docs](https://docs.openclaw.ai/gateway/security)) |
