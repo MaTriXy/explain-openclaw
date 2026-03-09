@@ -123,7 +123,7 @@ The system prompt example above is one instance of a broader pattern: **OpenClaw
 | System prompt | `src/agents/system-prompt.ts:484` | Soft — model can ignore |
 | SKILL.md instructions | Skill directories | Soft — model can ignore |
 | CLAUDE.md project rules | Project root | Soft — model can ignore |
-| Tool allowlist (`tools.exec.security: "allowlist"`) | Config (`src/config/types.tools.ts:184`) | **Hard — code enforced** |
+| Tool allowlist (`tools.exec.security: "allowlist"`) | Config (`src/config/types.tools.ts:232`) | **Hard — code enforced** |
 | Tool profiles (`"coding"`) | `src/agents/tool-policy.ts:63-80` | **Hard — code enforced** |
 | `set -euo pipefail` in scripts | Shell | **Hard — shell enforced** |
 | PreToolUse hooks | `.claude/hooks/` | **Hard — hook enforced** |
@@ -1048,12 +1048,12 @@ OpenClaw has several built-in protections. Understanding them helps you build on
 | **Dangerous env var blocklist** | Blocks `LD_PRELOAD`, `NODE_OPTIONS`, etc. from being set via exec tools | `src/agents/bash-tools.exec-runtime.ts:40-54` |
 | **Small model risk audit** | Warns when small/older models have tool access | `src/security/audit-extra.sync.ts:1088-1177` |
 | **ALLOWED_FILE_NAMES** | Restricts which agent bootstrap files can be modified via `agents.files.set` | `src/gateway/server-methods/agents.ts:66` |
-| **File permissions** | Config files created with `0o600`, directories with `0o700` | `src/config/io.ts:1121,1247` |
+| **File permissions** | Config files created with `0o600`, directories with `0o700` | `src/config/io.ts:1137,1263` |
 | **Tool profiles** | `"coding"` profile excludes the gateway tool entirely | `src/agents/tool-policy.ts:63-80` |
 | **System prompt warning** | Soft instruction to not run `config.apply` without user request | `src/agents/system-prompt.ts:480` |
 | **Restart sentinel** | Logs timestamp, session key, message, and stats on config-triggered restarts | `src/infra/restart-sentinel.ts:30-48` |
 | **Strict schema validation** | Zod `.strict()` rejects unknown top-level keys and type errors | `src/config/zod-schema.ts:879` |
-| **Forensic config write audit** | Every config write logged to `config-audit.jsonl` with PID, PPID, CWD, argv, content hashes, byte sizes, gateway-mode changes, and anomaly flags (size drops >50%, missing meta, gateway-mode removal) | `src/config/io.ts:495-538` (audit helpers), `:1177-1227` (audit record builder + append) |
+| **Forensic config write audit** | Every config write logged to `config-audit.jsonl` with PID, PPID, CWD, argv, content hashes, byte sizes, gateway-mode changes, and anomaly flags (size drops >50%, missing meta, gateway-mode removal) | `src/config/io.ts:511-538` (audit helpers), `:1177-1227` (audit record builder + append) |
 
 ---
 
