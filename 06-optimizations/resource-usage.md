@@ -27,7 +27,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | 1 | **Screenshot normalization** — nested loop of up to 7 sizes x 6 qualities = 42 sharp resize ops per screenshot | `src/browser/screenshot.ts:35-57` | Very High | Like resizing a photo 42 different ways to find which version fits in an envelope — each resize takes real effort |
 | 2 | **PNG image optimization** — grid of 5 sizes x 4 compression levels = 20 sharp ops (mozjpeg is CPU-heavy) | `src/media/image-ops.ts:400-457` | Very High | Like printing the same photo in 20 different quality settings to find the smallest file — each print job takes CPU time |
 | 3 | **Local embedding inference** — on-device GGUF model via node-llama-cpp, `Promise.all` over all texts | `src/memory/embeddings.ts:103-164` | Very High (when local) | Like running a mini-ChatGPT on your own machine to understand your notes — powerful but demands serious CPU |
-| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:447-820` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
+| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:524-905` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
 | 5 | **Cosine similarity fallback** — O(n) full-scan vector comparison when sqlite-vec unavailable | `src/memory/manager-search.ts:71-93` | High (per query) | Like comparing a new photo to every single photo in your album one-by-one, instead of using a smart index |
 | 6 | **PDF-to-image rendering** — per-page canvas creation + PNG encoding via `@napi-rs/canvas` | `src/media/pdf-extract.ts:42-103` | High (per PDF) | Like photocopying each page of a PDF into a separate image file — each page takes a rendering pass |
 | 7 | **Full AX tree traversal** — `Accessibility.getFullAXTree` on complex browser pages | `src/browser/cdp.ts:251-264` | Medium-High | Like reading every element on a web page aloud for accessibility — hundreds of elements on complex pages |
@@ -565,9 +565,9 @@ Setting up Prometheus/Grafana is beyond the scope of this guide — see the [Pro
 
 At the start of every session, OpenClaw loads `MEMORY.md` (or `memory.md`) from the workspace directory and injects its contents into the AI's first message as a context file. This happens unconditionally for all primary sessions — the only filtering is for subagent sessions, which receive only `AGENTS.md` and `TOOLS.md`.
 
-- Resolution: `src/agents/workspace.ts:438-473` — scans for `MEMORY.md` and `memory.md`, deduplicates
-- Loading: `src/agents/workspace.ts:475-531` — reads file contents into `WorkspaceBootstrapFile[]`
-- Filtering: `src/agents/workspace.ts:542-550` — `filterBootstrapFilesForSession()` only filters subagent sessions via an allowlist; all other sessions (including group chats) receive the full set
+- Resolution: `src/agents/workspace.ts:461-480` — scans for `MEMORY.md` and `memory.md`, deduplicates
+- Loading: `src/agents/workspace.ts:481-541` — reads file contents into `WorkspaceBootstrapFile[]`
+- Filtering: `src/agents/workspace.ts:551-559` — `filterBootstrapFilesForSession()` only filters subagent sessions via an allowlist; all other sessions (including group chats) receive the full set
 - Context building: `src/agents/pi-embedded-helpers/bootstrap.ts:187-239` — trims to `bootstrapMaxChars` (default 20,000 chars) using head/tail strategy with `totalMaxChars` cap (default 24,000)
 - Orchestration: `src/agents/bootstrap-files.ts:64-96` — wires resolution → filtering → context building
 
