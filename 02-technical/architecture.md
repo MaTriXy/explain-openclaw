@@ -70,8 +70,9 @@ OpenClaw is **Gateway-centric**. Most things you do (status, logs, pairing, send
 The Gateway:
 - binds a single port (default `18789`) and multiplexes:
   - WebSocket control plane
-  - Control UI / dashboard
+  - Control UI / dashboard (v2: modular views, command palette, mobile tabs, richer chat tools)
   - optional HTTP endpoints (`/v1/chat/completions`, `/v1/responses`, `/tools/invoke`)
+  - container health probes (`/health`, `/healthz`, `/ready`, `/readyz`) for Docker/Kubernetes
 - owns channel connections (WhatsApp Web session, Telegram bot long-poll, etc.)
 - owns local state (config, credentials, transcripts)
 
@@ -111,7 +112,7 @@ Docs: https://docs.openclaw.ai/gateway/configuration
 - WebSocket runtime + methods live under `src/gateway/server-*` modules.
 
 ### Channels
-- Core channel implementations are in per-channel folders (e.g. `src/telegram`, `src/discord`, `src/imessage`, `src/web`, etc.).
+- Channel implementations live under `extensions/` as workspace packages (e.g. `extensions/telegram`, `extensions/discord`, `extensions/slack`, `extensions/signal`, `extensions/imessage`, `extensions/whatsapp`, `extensions/feishu`). A few legacy adapters (`src/line/`, `src/whatsapp/`) remain in `src/`.
 - Shared channel logic + routing helpers live in `src/channels/`.
 
 ### Auto-reply / agent turns
@@ -132,13 +133,13 @@ Docs: https://docs.openclaw.ai/gateway/configuration
 - `src/memory/`. Persistent knowledge layer with SQLite + sqlite-vec storage, markdown chunking, embedding providers, hybrid search. (Detailed in [`resource-usage.md` Section F](../06-optimizations/resource-usage.md#f-how-openclaw-memory-works-architecture-deep-dive).)
 
 ### Plugins
-- `src/plugins/`. Plugin loading via jiti, hook registration, marketplace integration.
+- `src/plugins/`. Plugin loading via jiti, hook registration, marketplace integration. Since v2026.3.12, LLM providers (Ollama, vLLM, SGLang) are also provider plugins with provider-owned onboarding and discovery.
 
 ### Security
 - `src/security/`. Security audit (`openclaw security audit`), scan path helpers, fix application.
 
 ### Browser
-- `src/browser/`. Chromium automation via Playwright CDP. Screenshot normalization, AX tree traversal, extension relay.
+- `src/browser/`. Chromium automation via Playwright CDP. Screenshot normalization, AX tree traversal. Simplified to autoConnect-only (headless/remote MCP attach modes and chrome-relay auto-creation were dropped).
 
 ### TTS
 - `src/tts/`. Text-to-speech via ElevenLabs/OpenAI/Edge TTS APIs.

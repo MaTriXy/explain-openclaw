@@ -47,6 +47,7 @@ Where the Gateway listens:
 - `loopback` = localhost only (safest default)
 - `lan` = your LAN interfaces (requires auth)
 - `tailnet` = bind only to Tailscale IP, 100.x.y.z range (requires Tailscale)
+- `auto` = automatically choose the best bind mode based on environment
 - `custom` = bind to a specific IP address (set via `gateway.customBindHost`)
 
 Docs: https://docs.openclaw.ai/gateway/remote and https://docs.openclaw.ai/gateway/tailscale
@@ -57,9 +58,15 @@ A connector for a messaging surface: WhatsApp/Telegram/Discord/iMessage/etc.
 Docs: https://docs.openclaw.ai/channels
 
 ## Control UI / Dashboard
-The web interface served by the Gateway (on the same port as the WebSocket).
+The web interface served by the Gateway (on the same port as the WebSocket). Dashboard-v2 (v2026.3.12) added modular overview, chat, config, agent, and session views, a command palette, mobile bottom tabs, and richer chat tools (slash commands, search, export, pinned messages).
 
 Docs: https://docs.openclaw.ai/web/dashboard
+
+## Fast mode
+A per-session toggle (`/fast`) that requests faster output from supported providers (Anthropic `service_tier`, OpenAI fast tier). Configurable via TUI, Control UI, ACP, and per-model config defaults.
+
+## SecretRef
+A reference-based credential system that resolves secrets at runtime from environment variables, files, or exec commands — instead of storing plaintext values in config. Supports 64 credential targets across providers, channels, webhooks, and gateway auth.
 
 ## Gateway
 The long-running process that owns:
@@ -118,6 +125,12 @@ Docs: https://docs.openclaw.ai/concepts/session
 A capability the model can invoke (web fetch/search, browser automation, cron, exec, node calls).
 
 Docs: https://docs.openclaw.ai/tools
+
+## Webchat
+A browser-based channel that connects to the Gateway's WebSocket endpoint directly. Unlike external messaging platforms, webchat runs in the Control UI and supports toggles for hiding tool calls and thinking blocks.
+
+## Extended thinking / reasoning
+When a model supports "extended thinking" (e.g., Claude with `thinking` or providers with reasoning tokens), OpenClaw can stream intermediate reasoning steps before the final answer. Configured via thinking level settings (`--thinking` flag or `agents.defaults.thinking`).
 
 ## Skill
 A packaged AI routine (commands + optional tools) that extends the agent's capabilities. Install from ClawHub or load locally; configured via `skills.load.*`. The built-in skill scanner checks for dangerous code patterns at install time.

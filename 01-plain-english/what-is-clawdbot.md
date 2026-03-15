@@ -71,7 +71,11 @@ Examples:
 - Telegram (Bot API)
 - Discord
 - iMessage (macOS integration)
-- plus plugins for many more
+- Slack
+- Signal
+- Feishu (with streaming cards, reasoning stream, card actions)
+- Webchat (browser-based, built into the Control UI)
+- plus plugins for many more (Matrix, Zalo, IRC, Nostr, Twitch, etc.)
 
 Channels normalize “incoming message events” into a common internal shape.
 
@@ -102,16 +106,19 @@ Docs: https://docs.openclaw.ai/concepts/agent
 Tools let the model do more than output text.
 
 Depending on what you enable, tools can include:
-- web fetch/search
+- web fetch/search (including Brave LLM Context mode for grounding snippets)
 - browser automation
 - cron/automation
 - exec or node/device invocations
-- memory search (semantic search across indexed notes and past conversations)
+- memory search (semantic search across indexed notes and past conversations; supports multimodal image/audio indexing with Gemini embeddings)
 - canvas/drawing (interactive visual outputs)
 - image processing (resize, optimize, convert)
+- PDF analysis (native Anthropic/Google support, extraction fallback for other models)
+- diffs (read-only diff rendering from before/after text or unified patches, with PNG/PDF output)
 - text-to-speech (ElevenLabs, OpenAI, Edge TTS)
-- session management (list, send, history across sessions)
+- session management (list, send, history across sessions, yield control to another session)
 - gateway control (config, status, restart from within agent)
+- `/btw` side questions (ephemeral one-shot queries against current session context, no transcript persistence)
 
 Tools are where most real-world risk comes from.
 
