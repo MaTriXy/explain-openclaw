@@ -235,7 +235,7 @@ openclaw security audit
 
 If you're not using a reverse proxy, leave `trustedProxies` empty (the default).
 
-Source: `src/gateway/net.ts:141-186` (`isTrustedProxyAddress` + `resolveClientIp`)
+Source: `src/gateway/net.ts:145-189` (`isTrustedProxyAddress` + `resolveClientIp`)
 
 See: [Threat model - Trusted proxies](./threat-model.md#trusted-proxies-reverse-proxy-configuration)
 
