@@ -83,7 +83,7 @@ This is not a problem with one specific model. It's a class of problem:
 - **Large models** (Opus, GPT-5, Sonnet) hallucinate less but can still confidently set dangerous-but-valid values
 - **All models** follow instructions — if a prompt injection says "fix the config," they will try
 
-OpenClaw's security audit warns about small/older models with tool access (`src/security/audit-extra.sync.ts:1088-1177`), but this risk exists at every model tier.
+OpenClaw's security audit warns about small/older models with tool access (`src/security/audit-extra.sync.ts:1076-1115`), but this risk exists at every model tier.
 
 ### Why "Secure by Default" Doesn't Help Here
 
@@ -143,7 +143,7 @@ GLM-5:
 4. Ran raw `rsync --delete` directly — **deleting files**
 5. Misinterpreted `disable-model-invocation: true` in the skill frontmatter as meaning the skill was "disabled"
 
-The `disable-model-invocation` flag is parsed at `src/agents/skills/frontmatter.ts:220` and used at `src/agents/skills/workspace.ts:498` to filter skills from the model prompt — it controls whether the *model* can invoke the skill unprompted, not whether the skill is "disabled." GLM-5 read the flag, hallucinated an incorrect interpretation, and acted on it.
+The `disable-model-invocation` flag is parsed at `src/agents/skills/frontmatter.ts:220` and used at `src/agents/skills/workspace.ts:544` to filter skills from the model prompt — it controls whether the *model* can invoke the skill unprompted, not whether the skill is "disabled." GLM-5 read the flag, hallucinated an incorrect interpretation, and acted on it.
 
 This is the same class of problem as the system prompt bypass above, but more severe: the SKILL.md contained explicit safety instructions, and the model read them, understood them, and decided to do something else anyway.
 
@@ -199,7 +199,7 @@ Every path through which the AI can modify system state:
 - Gateway RPC scope enforcement + rate limiting: `src/gateway/server-methods.ts:39-66,104-129`
 - Chat command with two gates: `src/auto-reply/reply/commands-config.ts:39,54-72`
 - Cron tool: `src/gateway/server-methods/cron.ts:91-124`
-- Agent files: `src/gateway/server-methods/agents.ts:66,673`
+- Agent files: `src/gateway/server-methods/agents.ts:66,714`
 
 **Key insight:** The `/config set` chat command has dedicated chat-command gates (`commands.config` + `configWrites`). Gateway tool writes use a different control plane (owner-only tool policy + gateway auth/scopes/rate limits). So `configWrites: false` is useful defense-in-depth, but it does not block gateway-tool config changes.
 
@@ -286,7 +286,7 @@ openclaw config set gateway.controlUi.dangerouslyDisableDeviceAuth false
 openclaw config set gateway.controlUi.allowInsecureAuth false
 ```
 
-**Does `openclaw security audit` catch this?** Yes — `dangerouslyDisableDeviceAuth=true` is flagged as severity "critical" and `allowInsecureAuth=true` is flagged as severity "warn" (`src/security/audit.ts:564-584`).
+**Does `openclaw security audit` catch this?** Yes — `dangerouslyDisableDeviceAuth=true` is flagged as severity "critical" and `allowInsecureAuth=true` is flagged as severity "warn" (`src/security/audit.ts:565-590`).
 
 ---
 
@@ -333,7 +333,7 @@ openclaw config set tools.elevated false
 **Severity:** 🟠 HIGH
 **Applicability:** Self-hosted
 
-OpenClaw's Docker sandbox ships with strong defaults (`src/agents/sandbox/config.ts:76-120`). But every hardened default can be overridden via config — meaning an AI (or a human) can systematically dismantle the sandbox one setting at a time.
+OpenClaw's Docker sandbox ships with strong defaults (`src/agents/sandbox/config.ts:82-128`). But every hardened default can be overridden via config — meaning an AI (or a human) can systematically dismantle the sandbox one setting at a time.
 
 #### 4a. Network Isolation Removal
 
@@ -454,7 +454,7 @@ Source: `src/agents/sandbox/docker.ts:459-465` — workspace mount with optional
 - `/:/host:rw` — mounts the **entire host filesystem** read-write into the container. Complete host compromise.
 - `/var/run/docker.sock` — gives the container access to the Docker daemon. The sandboxed agent can now create new privileged containers, escape the sandbox entirely, and control the host.
 
-Any bind mount widens the attack surface. Agent-level binds are **concatenated** with global binds (`src/agents/sandbox/config.ts:92`), so per-agent overrides add to — not replace — the global list.
+Any bind mount widens the attack surface. Agent-level binds are **concatenated** with global binds (`src/agents/sandbox/config.ts:97`), so per-agent overrides add to — not replace — the global list.
 
 Source: `src/agents/sandbox/docker.ts:421-425` — iterates `binds` array to build `-v` flags
 
@@ -846,7 +846,7 @@ openclaw cron remove <job-id>
 
 **Security impact:** Bootstrap files are loaded into the system prompt on every agent turn. Injected content appears as trusted system instructions. This persists across sessions and affects all future conversations.
 
-**Source:** `src/gateway/server-methods/agents.ts:673`
+**Source:** `src/gateway/server-methods/agents.ts:714`
 
 The `agents.files.set` method restricts writes to `ALLOWED_FILE_NAMES` only, but all allowed names (IDENTITY.md, SOUL.md, TOOLS.md, AGENTS.md, etc.) are security-sensitive — they're injected directly into the system prompt.
 
@@ -910,7 +910,7 @@ No single change looks catastrophic. Together, they give anyone on the network u
 
 ### Schema-Valid but Unsafe Values
 
-OpenClaw uses Zod schemas with `.strict()` mode (`src/config/zod-schema.ts:922`). This means:
+OpenClaw uses Zod schemas with `.strict()` mode (`src/config/zod-schema.ts:917`). This means:
 - **Unknown top-level keys are rejected** — the AI can't add random keys
 - **Type errors are caught** — wrong types for known keys fail validation
 - **Semantic security errors pass** — `gateway.bind: "lan"` is a valid value for a known key, even though it's dangerous
@@ -1006,7 +1006,7 @@ openclaw security audit --deep  # Extended checks
 openclaw security audit --fix   # Auto-fix common issues
 ```
 
-Source: `src/security/audit.ts:1166-1289`
+Source: `src/security/audit.ts:1189-1318`
 
 ### `openclaw doctor`
 
@@ -1021,7 +1021,7 @@ openclaw doctor                  # Interactive mode
 openclaw doctor --non-interactive  # CI/CD mode (no prompts)
 ```
 
-Source: `src/commands/doctor.ts:67-326`
+Source: `src/commands/doctor.ts:74-371`
 
 ### `openclaw status`
 
@@ -1046,13 +1046,13 @@ OpenClaw has several built-in protections. Understanding them helps you build on
 | **baseHash optimistic locking** | Prevents concurrent config overwrites (not a security control — AI reads the hash first) | `src/gateway/server-methods/config.ts:57-514` |
 | **Credential redaction** | API keys replaced with `__OPENCLAW_REDACTED__` in `config.get` responses | `src/config/redact-snapshot.ts:78,312-319` |
 | **Dangerous env var blocklist** | Blocks `LD_PRELOAD`, `NODE_OPTIONS`, etc. from being set via exec tools | `src/agents/bash-tools.exec-runtime.ts:40-54` |
-| **Small model risk audit** | Warns when small/older models have tool access | `src/security/audit-extra.sync.ts:1088-1177` |
+| **Small model risk audit** | Warns when small/older models have tool access | `src/security/audit-extra.sync.ts:1076-1115` |
 | **ALLOWED_FILE_NAMES** | Restricts which agent bootstrap files can be modified via `agents.files.set` | `src/gateway/server-methods/agents.ts:66` |
 | **File permissions** | Config files created with `0o600`, directories with `0o700` | `src/config/io.ts:1138,1264` |
 | **Tool profiles** | `"coding"` profile excludes the gateway tool entirely | `src/agents/tool-catalog.ts:248-260` |
 | **System prompt warning** | Soft instruction to not run `config.apply` without user request | `src/agents/system-prompt.ts:480` |
 | **Restart sentinel** | Logs timestamp, session key, message, and stats on config-triggered restarts | `src/infra/restart-sentinel.ts:30-48` |
-| **Strict schema validation** | Zod `.strict()` rejects unknown top-level keys and type errors | `src/config/zod-schema.ts:922` |
+| **Strict schema validation** | Zod `.strict()` rejects unknown top-level keys and type errors | `src/config/zod-schema.ts:917` |
 | **Forensic config write audit** | Every config write logged to `config-audit.jsonl` with PID, PPID, CWD, argv, content hashes, byte sizes, gateway-mode changes, and anomaly flags (size drops >50%, missing meta, gateway-mode removal) | `src/config/io.ts:511-538` (audit helpers), `:1177-1227` (audit record builder + append) |
 
 ---

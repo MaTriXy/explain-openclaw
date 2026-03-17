@@ -65,21 +65,26 @@ User-Agent: openclaw
 
 **Who sees this:** Anthropic API servers.
 
-### `HTTP-Referer` + `X-Title` — OpenRouter / Perplexity API
+### `HTTP-Referer` + `X-OpenRouter-Title` — OpenRouter / Perplexity API
 
 OpenClaw identifies itself to OpenRouter and Perplexity via app attribution headers:
 
 ```
 HTTP-Referer: https://openclaw.ai
-X-Title: OpenClaw
+X-OpenRouter-Title: OpenClaw
 ```
 
-**Source:** `src/agents/pi-embedded-runner/proxy-stream-wrappers.ts:5-7`
+**Source:** `src/agents/provider-attribution.ts:43-60`
 ```typescript
-const OPENROUTER_APP_HEADERS: Record<string, string> = {
-  "HTTP-Referer": "https://openclaw.ai",
-  "X-Title": "OpenClaw",
-};
+function buildOpenRouterAttributionPolicy() {
+  return {
+    headers: {
+      "HTTP-Referer": "https://openclaw.ai",
+      "X-OpenRouter-Title": identity.product,
+      "X-OpenRouter-Categories": "cli-agent",
+    },
+  };
+}
 ```
 
 For Perplexity web search specifically, the title is more descriptive:
@@ -344,8 +349,8 @@ export type GatewayClientInfo = {
 | `User-Agent: OpenClaw-Gateway/1.0` | `src/media/input-files.ts:189` | Media file downloads |
 | `User-Agent: openclaw` | `src/commands/signal-install.ts:221` | Signal CLI installation |
 | `User-Agent: openclaw` | `src/infra/provider-usage.fetch.claude.ts:125` | Anthropic usage check |
-| `HTTP-Referer: https://openclaw.ai` | `src/agents/pi-embedded-runner/proxy-stream-wrappers.ts:6` | OpenRouter/Perplexity |
-| `X-Title: OpenClaw` | `src/agents/pi-embedded-runner/proxy-stream-wrappers.ts:7` | OpenRouter/Perplexity |
+| `HTTP-Referer: https://openclaw.ai` | `src/agents/provider-attribution.ts:56` | OpenRouter/Perplexity |
+| `X-OpenRouter-Title: OpenClaw` | `src/agents/provider-attribution.ts:57` | OpenRouter/Perplexity |
 | `X-Title: OpenClaw Web Search` | `src/agents/tools/web-search-core.ts:1238` | Perplexity search |
 | `MM-API-Source: OpenClaw` | `src/agents/minimax-vlm.ts:73` | MiniMax VLM |
 
@@ -543,7 +548,7 @@ When placing Cloudflare in front of the Gateway, configure these settings:
 | Auth | `gateway.auth.token` or `gateway.auth.password` | Must be set | Gateway **refuses to start** on non-loopback without auth (`src/gateway/server-runtime-config.ts:124`), unless `auth.mode="trusted-proxy"` |
 | Trusted proxies | `gateway.trustedProxies` | Cloudflare IP ranges | Gateway trusts `X-Forwarded-For` / `X-Real-IP` from these IPs for client IP resolution (`src/gateway/net.ts:145-189`) |
 
-**Source:** `src/config/types.gateway.ts:420`
+**Source:** `src/config/types.gateway.ts:427`
 ```typescript
 /**
  * IPs of trusted reverse proxies (e.g. Traefik, nginx). When a connection
@@ -589,12 +594,9 @@ OpenClaw's HTTP API endpoints read several custom headers from inbound requests.
 | `x-openclaw-agent-id` | `src/gateway/http-utils.ts:27` | Agent routing — selects which named agent handles the request | `/v1/chat/completions`, `/v1/responses` |
 | `x-openclaw-agent` | `src/gateway/http-utils.ts:28` | Agent routing (fallback alias for `x-openclaw-agent-id`) | Same as above |
 | `x-openclaw-session-key` | `src/gateway/http-utils.ts:71` | Session pinning — pins request to a specific named session | `/v1/chat/completions`, `/v1/responses` |
-| `x-openclaw-token` | `src/gateway/hooks.ts:168-169` | Webhook authentication — alternative to `Authorization: Bearer` | `/hooks/*` |
+| `x-openclaw-token` | `src/gateway/hooks.ts:147-148` | Webhook authentication — alternative to `Authorization: Bearer` | `/hooks/*` |
 | `x-openclaw-message-channel` | `src/gateway/tools-invoke-http.ts:214-215` | Tool policy routing — specifies channel context (e.g., `"discord"`, `"slack"`) | `/tools/invoke` |
 | `x-openclaw-account-id` | `src/gateway/tools-invoke-http.ts:215` | Account-level tool policy routing | `/tools/invoke` |
-| `x-openclaw-relay-token` | `src/browser/extension-relay.ts:84` | Browser extension CDP relay auth | Separate loopback-only server (NOT on main Gateway port) |
-
-> **Note:** `x-openclaw-relay-token` is on a separate server that binds exclusively to loopback — it is **never** accessible through Cloudflare and is listed here only for completeness.
 
 ### WAF rules for inbound Gateway protection
 
