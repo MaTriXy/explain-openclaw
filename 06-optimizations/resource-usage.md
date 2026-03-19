@@ -27,7 +27,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | 1 | **Screenshot normalization** — nested loop of up to 7 sizes x 6 qualities = 42 sharp resize ops per screenshot | `src/browser/screenshot.ts:35-57` | Very High | Like resizing a photo 42 different ways to find which version fits in an envelope — each resize takes real effort |
 | 2 | **PNG image optimization** — grid of 5 sizes x 4 compression levels = 20 sharp ops (mozjpeg is CPU-heavy) | `src/media/image-ops.ts:400-457` | Very High | Like printing the same photo in 20 different quality settings to find the smallest file — each print job takes CPU time |
 | 3 | **Local embedding inference** — on-device GGUF model via node-llama-cpp, `Promise.all` over all texts | `src/memory/embeddings.ts:103-164` | Very High (when local) | Like running a mini-ChatGPT on your own machine to understand your notes — powerful but demands serious CPU |
-| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:851-868` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
+| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:706-729` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
 | 5 | **Cosine similarity fallback** — O(n) full-scan vector comparison when sqlite-vec unavailable | `src/memory/manager-search.ts:71-93` | High (per query) | Like comparing a new photo to every single photo in your album one-by-one, instead of using a smart index |
 | 6 | **PDF-to-image rendering** — per-page canvas creation + PNG encoding via `@napi-rs/canvas` | `src/media/pdf-extract.ts:42-103` | High (per PDF) | Like photocopying each page of a PDF into a separate image file — each page takes a rendering pass |
 | 7 | **Full AX tree traversal** — `Accessibility.getFullAXTree` on complex browser pages | `src/browser/cdp.ts:251-264` | Medium-High | Like reading every element on a web page aloud for accessibility — hundreds of elements on complex pages |
@@ -35,8 +35,8 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | 9 | **Media understanding** — sending media to AI providers (Whisper/Gemini/OpenAI) for transcription | `src/media-understanding/runner.ts:576-809` | Medium | CPU cost is mostly on the provider side, but local buffering and encoding still takes cycles |
 | 10 | **Ed25519 keypair generation** — asymmetric crypto on first run / device identity creation | `src/infra/device-identity.ts:57` | Low (one-time) | Like generating a strong password — intensive but happens only once |
 | 11 | **Memory sync** — file hashing + markdown chunking + embedding + SQLite FTS5/vec indexing | `src/memory/manager.ts:380+` | Medium (periodic) | Like re-indexing a library catalog — scanning, categorizing, and filing every document |
-| 12 | **TTS generation** — ElevenLabs/OpenAI/Edge TTS API calls + audio buffer handling | `src/tts/tts.ts:604-756` | Medium | API calls are remote but audio buffer conversion is local CPU work |
-| 13 | **Agent execution loop** — continuous model response processing | `src/auto-reply/reply/agent-runner-execution.ts:76` | Medium (continuous) | The main "brain" loop — always running while the bot is responding |
+| 12 | **TTS generation** — ElevenLabs/OpenAI/Edge TTS API calls + audio buffer handling | `src/tts/tts.ts:628-747` | Medium | API calls are remote but audio buffer conversion is local CPU work |
+| 13 | **Agent execution loop** — continuous model response processing | `src/auto-reply/reply/agent-runner-execution.ts:77` | Medium (continuous) | The main "brain" loop — always running while the bot is responding |
 | 14 | **Cron timer loop** — re-arming `setTimeout` for scheduled job processing | `src/cron/service/timer.ts:547` | Low (idle) | Like a clock ticking in the background — minimal CPU unless jobs are firing |
 
 ### Other CPU consumers
@@ -126,7 +126,7 @@ Modules loaded via jiti persist for process lifetime. Each plugin's tools, comma
 | Telegram sticker cache | `src/telegram/sticker-cache.ts:35-67` | **No eviction** — JSON grows with unique stickers |
 | Browser user-data profiles | `src/browser/chrome.ts:80-82` | Full Chromium profile — can reach GBs |
 | SQLite databases | `src/memory/manager-sync-ops.ts:252-262` | **No VACUUM** — database grows unbounded without periodic vacuuming (uses default DELETE journal mode, no WAL) |
-| Per-day log file size | `src/logging/logger.ts:44,187-201` | **Capped** — 500MB default (`DEFAULT_MAX_LOG_FILE_BYTES`), configurable via `logging.maxFileBytes`; warns once then suppresses writes when reached |
+| Per-day log file size | `src/logging/logger.ts:50,193-207` | **Capped** — 500MB default (`DEFAULT_MAX_LOG_FILE_BYTES`), configurable via `logging.maxFileBytes`; warns once then suppresses writes when reached |
 | Voice-call `calls.jsonl` | `extensions/voice-call/src/manager/store.ts:7-10` | **Append-only, no rotation** + full-file reads on load |
 
 > *Transcript JSONL files:* Like a chat log that records every message forever but never archives or deletes old conversations — a busy bot can accumulate gigabytes over months.
@@ -140,7 +140,7 @@ Modules loaded via jiti persist for process lifetime. Each plugin's tools, comma
 | Resource | Limit | Location |
 |----------|-------|----------|
 | Media files | 2min TTL auto-cleanup | `src/media/store.ts:16,94-130` |
-| Rolling logs | 24h age pruning | `src/logging/logger.ts:43,354` |
+| Rolling logs | 24h age pruning | `src/logging/logger.ts:49,360` |
 | Session store | 500 entries, 30d prune, 10MB rotation, 3 backups | `src/config/sessions/store-maintenance.ts:12-14` |
 | Cron run logs | 2MB/2000 lines self-pruning | `src/cron/run-log.ts:82-83` |
 | TTS temp files | 5min delayed cleanup | `src/tts/tts-core.ts:24,538-548` |
@@ -654,7 +654,7 @@ A configurable **fallback provider** (`memorySearch.fallback`) is tried if the p
 1. **Embed the query** — convert to a vector using the configured embedding provider
 2. **Vector search** — find similar chunks via `vec_distance_cosine()` in sqlite-vec, or fall back to O(n) cosine similarity scan if sqlite-vec is unavailable (`src/memory/manager-search.ts:20-94`)
 3. **Keyword search** — FTS5 BM25 ranking via the `chunks_fts` virtual table (`src/memory/manager-search.ts:136-191`)
-4. **Merge results** — combined score: `vectorWeight × vectorScore + textWeight × textScore` (`src/memory/hybrid.ts:102-103`)
+4. **Merge results** — combined score: `vectorWeight × vectorScore + textWeight × textScore` (`src/memory/hybrid.ts:128`)
 5. **Filter and cap** — discard results below `minScore`, return top `maxResults`
 
 **Default parameters:**
