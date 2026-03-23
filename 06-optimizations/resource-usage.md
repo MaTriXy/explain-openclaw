@@ -35,7 +35,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | 9 | **Media understanding** — sending media to AI providers (Whisper/Gemini/OpenAI) for transcription | `src/media-understanding/runner.ts:576-809` | Medium | CPU cost is mostly on the provider side, but local buffering and encoding still takes cycles |
 | 10 | **Ed25519 keypair generation** — asymmetric crypto on first run / device identity creation | `src/infra/device-identity.ts:57` | Low (one-time) | Like generating a strong password — intensive but happens only once |
 | 11 | **Memory sync** — file hashing + markdown chunking + embedding + SQLite FTS5/vec indexing | `src/memory/manager-sync-ops.ts:696` | Medium (periodic) | Like re-indexing a library catalog — scanning, categorizing, and filing every document |
-| 12 | **TTS generation** — ElevenLabs/OpenAI/Edge TTS API calls + audio buffer handling | `src/tts/tts.ts:646-735` | Medium | API calls are remote but audio buffer conversion is local CPU work |
+| 12 | **TTS generation** — ElevenLabs/OpenAI/Edge TTS API calls + audio buffer handling | `src/tts/tts.ts:648-737` | Medium | API calls are remote but audio buffer conversion is local CPU work |
 | 13 | **Agent execution loop** — continuous model response processing | `src/auto-reply/reply/agent-runner-execution.ts:77` | Medium (continuous) | The main "brain" loop — always running while the bot is responding |
 | 14 | **Cron timer loop** — re-arming `setTimeout` for scheduled job processing | `src/cron/service/timer.ts:547` | Low (idle) | Like a clock ticking in the background — minimal CPU unless jobs are firing |
 
@@ -67,7 +67,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 
 | Cache | Location | Bound | Risk |
 |-------|----------|-------|------|
-| Session store cache | `src/config/sessions/store.ts:52` | 45s TTL, `structuredClone` per read | Medium — each entry holds all 500 sessions |
+| Session store cache | `src/config/sessions/store-cache.ts:11-13` | 45s TTL, `structuredClone` per read | Medium — each entry holds all 500 sessions |
 | Discord presence cache | `src/discord/monitor/presence-cache.ts:9` | 5000/account LRU | Low |
 | Telegram sent message cache | `src/telegram/sent-message-cache.ts:12` | 24h TTL, 100/chat | Low-Medium |
 | History map | `src/auto-reply/reply/history.ts:7` | 1000 keys LRU | Well bounded |
@@ -76,10 +76,10 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | Browser roleRefs | `src/browser/pw-session.ts:112-113` | 50 max LRU | Well bounded |
 | Followup queues | `src/auto-reply/reply/queue/state.ts:18` | 20/queue, no queue count cap; `clearFollowupQueue()` (`queue/cleanup.ts:24`) clears individual queues during session cleanup | **Partially mitigated** — individual queues can be cleared but total queue-map still uncapped |
 | Agent event seqByRun | `src/infra/agent-events.ts:23` | **No cleanup** (`seqByRun` never pruned; `runContextById` now cleaned via `clearAgentRunContext()` at `:49`) | **Partial leak** — `runContextById` fixed, `seqByRun` still leaks |
-| Agent run sequence | `src/gateway/server-runtime-state.ts:218` | **No pruning** (maintenance timer skips it) | **Leak risk** |
+| Agent run sequence | `src/gateway/server-runtime-state.ts:219` | **No pruning** (maintenance timer skips it) | **Leak risk** |
 | WhatsApp group histories | `src/web/auto-reply/monitor.ts:105` | Helper has 1000-key cap, but web direct writes bypass it | **Partial leak** |
 | WhatsApp group member names | `src/web/auto-reply/monitor.ts:115` | **No eviction at all** | **Leak risk** |
-| Cost usage cache | `src/gateway/server-methods/usage.ts:41` | 30s TTL per entry, **no max entry count** | Low-Medium |
+| Cost usage cache | `src/gateway/server-methods/usage.ts:60` | 30s TTL per entry, **no max entry count** | Low-Medium |
 | Warned contexts | `src/infra/session-maintenance-warning.ts:17` | **Never pruned** | Low |
 | Announce queues | `src/agents/subagent-announce-queue.ts:60` | Per-queue cap, **no queue count cap** | Low |
 | Telegram sent msgs outer map | `src/telegram/sent-message-cache.ts:12` | Per-chat TTL, **outer map never evicts dead chat keys** | Low-Medium |
@@ -576,8 +576,8 @@ The AI can actively query its memory index using two tools:
 
 | Tool | Purpose | Source |
 |------|---------|--------|
-| `memory_search` | Semantic hybrid search across all indexed memory files; returns top snippets with path + line numbers | `src/agents/tools/memory-tool.ts:96-150` |
-| `memory_get` | Read a specific file or line range from `MEMORY.md` or `memory/*.md`; use after `memory_search` to pull exact content | `src/agents/tools/memory-tool.ts:152-207` |
+| `memory_search` | Semantic hybrid search across all indexed memory files; returns top snippets with path + line numbers | `src/agents/tools/memory-tool.ts:106-161` |
+| `memory_get` | Read a specific file or line range from `MEMORY.md` or `memory/*.md`; use after `memory_search` to pull exact content | `src/agents/tools/memory-tool.ts:163-214` |
 
 The `memory_search` tool description instructs the AI to use it as a "mandatory recall step" before answering questions about prior work, decisions, preferences, or dates.
 
@@ -734,7 +734,7 @@ During sync, unchanged files are skipped (hash comparison against the `files` ta
 
 When the conversation approaches the context window limit, OpenClaw inserts a silent "memory flush" turn before running compaction:
 
-**Trigger condition** (`src/auto-reply/reply/memory-flush.ts:125-170`):
+**Trigger condition** (`src/auto-reply/reply/memory-flush.ts:173-215`):
 
 ```
 totalTokens >= contextWindow - reserveTokens - softThreshold
