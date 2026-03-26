@@ -36,7 +36,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | 10 | **Ed25519 keypair generation** — asymmetric crypto on first run / device identity creation | `src/infra/device-identity.ts:57` | Low (one-time) | Like generating a strong password — intensive but happens only once |
 | 11 | **Memory sync** — file hashing + markdown chunking + embedding + SQLite FTS5/vec indexing | `src/memory/manager-sync-ops.ts:696` | Medium (periodic) | Like re-indexing a library catalog — scanning, categorizing, and filing every document |
 | 12 | **TTS generation** — ElevenLabs/OpenAI/Edge TTS API calls + audio buffer handling | `src/tts/tts.ts:648-737` | Medium | API calls are remote but audio buffer conversion is local CPU work |
-| 13 | **Agent execution loop** — continuous model response processing | `src/auto-reply/reply/agent-runner-execution.ts:77` | Medium (continuous) | The main "brain" loop — always running while the bot is responding |
+| 13 | **Agent execution loop** — continuous model response processing | `src/auto-reply/reply/agent-runner-execution.ts:78` | Medium (continuous) | The main "brain" loop — always running while the bot is responding |
 | 14 | **Cron timer loop** — re-arming `setTimeout` for scheduled job processing | `src/cron/service/timer.ts:547` | Low (idle) | Like a clock ticking in the background — minimal CPU unless jobs are firing |
 
 ### Other CPU consumers
@@ -72,11 +72,11 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | Telegram sent message cache | `src/telegram/sent-message-cache.ts:12` | 24h TTL, 100/chat | Low-Medium |
 | History map | `src/auto-reply/reply/history.ts:7` | 1000 keys LRU | Well bounded |
 | Inbound dedupe | `src/auto-reply/reply/inbound-dedupe.ts:9` | 5000 max, 20min TTL | Well bounded |
-| Gateway dedupe | `src/gateway/server-constants.ts:40-41` | 1000 max, 5min TTL | Well bounded |
+| Gateway dedupe | `src/gateway/server-constants.ts:26-27` | 1000 max, 5min TTL | Well bounded |
 | Browser roleRefs | `src/browser/pw-session.ts:112-113` | 50 max LRU | Well bounded |
 | Followup queues | `src/auto-reply/reply/queue/state.ts:19` | 20/queue, no queue count cap; `clearFollowupQueue()` (`queue/cleanup.ts:24`) clears individual queues during session cleanup | **Partially mitigated** — individual queues can be cleared but total queue-map still uncapped |
 | Agent event seqByRun | `src/infra/agent-events.ts:23` | **No cleanup** (`seqByRun` never pruned; `runContextById` now cleaned via `clearAgentRunContext()` at `:49`) | **Partial leak** — `runContextById` fixed, `seqByRun` still leaks |
-| Agent run sequence | `src/gateway/server-runtime-state.ts:219` | **No pruning** (maintenance timer skips it) | **Leak risk** |
+| Agent run sequence | `src/gateway/server-runtime-state.ts:227` | Bounded at `AGENT_RUN_SEQ_MAX` = 10,000 (pruned by maintenance timer) | Well bounded |
 | WhatsApp group histories | `src/web/auto-reply/monitor.ts:105` | Helper has 1000-key cap, but web direct writes bypass it | **Partial leak** |
 | WhatsApp group member names | `src/web/auto-reply/monitor.ts:115` | **No eviction at all** | **Leak risk** |
 | Cost usage cache | `src/gateway/server-methods/usage.ts:60` | 30s TTL per entry, **no max entry count** | Low-Medium |
@@ -126,7 +126,7 @@ Modules loaded via jiti persist for process lifetime. Each plugin's tools, comma
 | Telegram sticker cache | `src/telegram/sticker-cache.ts:35-67` | **No eviction** — JSON grows with unique stickers |
 | Browser user-data profiles | `src/browser/chrome.ts:80-82` | Full Chromium profile — can reach GBs |
 | SQLite databases | `src/memory/manager-sync-ops.ts:252-262` | **No VACUUM** — database grows unbounded without periodic vacuuming (uses default DELETE journal mode, no WAL) |
-| Per-day log file size | `src/logging/logger.ts:50,193-207` | **Capped** — 500MB default (`DEFAULT_MAX_LOG_FILE_BYTES`), configurable via `logging.maxFileBytes`; warns once then suppresses writes when reached |
+| Per-day log file size | `src/logging/logger.ts:49,187-202` | **Capped** — 500MB default (`DEFAULT_MAX_LOG_FILE_BYTES`), configurable via `logging.maxFileBytes`; warns once then suppresses writes when reached |
 | Voice-call `calls.jsonl` | `extensions/voice-call/src/manager/store.ts:7-10` | **Append-only, no rotation** + full-file reads on load |
 
 > *Transcript JSONL files:* Like a chat log that records every message forever but never archives or deletes old conversations — a busy bot can accumulate gigabytes over months.
@@ -140,7 +140,7 @@ Modules loaded via jiti persist for process lifetime. Each plugin's tools, comma
 | Resource | Limit | Location |
 |----------|-------|----------|
 | Media files | 2min TTL auto-cleanup | `src/media/store.ts:16,94-130` |
-| Rolling logs | 24h age pruning | `src/logging/logger.ts:49,360` |
+| Rolling logs | 24h age pruning | `src/logging/logger.ts:48,357` |
 | Session store | 500 entries, 30d prune, 10MB rotation, 3 backups | `src/config/sessions/store-maintenance.ts:12-14` |
 | Cron run logs | 2MB/2000 lines self-pruning | `src/cron/run-log.ts:82-83` |
 | TTS temp files | 5min delayed cleanup | `src/tts/tts-core.ts:24,538-548` |
@@ -666,7 +666,7 @@ A configurable **fallback provider** (`memorySearch.fallback`) is tried if the p
 | `candidateMultiplier` | 4 (fetch 4× candidates, then trim) | `src/agents/memory-search.ts:105` |
 | `maxResults` | 6 | `src/agents/memory-search.ts:100` |
 | `minScore` | 0.35 | `src/agents/memory-search.ts:101` |
-| Snippet cap | 700 chars | `src/memory/manager.ts:34` |
+| Snippet cap | 700 chars | `src/memory/manager.ts:33` |
 
 With defaults: 24 candidates are fetched (6 × 4), merged and scored, then the top 6 with score ≥ 0.35 are returned, each snippet capped at 700 characters.
 
