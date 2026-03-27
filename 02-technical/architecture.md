@@ -92,7 +92,7 @@ Docs: https://docs.openclaw.ai/gateway/configuration
 
 ### Input sanitization
 
-`src/gateway/chat-sanitize.ts` strips platform envelope metadata (WhatsApp headers, message IDs, control characters) from user messages before processing. `sanitizeChatSendMessageInput()` (`src/gateway/server-methods/chat.ts:255`) rejects null bytes and strips disallowed control characters, allowing only tabs, newlines, carriage returns, and printable characters through.
+`src/gateway/chat-sanitize.ts` strips platform envelope metadata (WhatsApp headers, message IDs, control characters) from user messages before processing. `sanitizeChatSendMessageInput()` (`src/gateway/server-methods/chat.ts:265`) rejects null bytes and strips disallowed control characters, allowing only tabs, newlines, carriage returns, and printable characters through.
 
 ### Config merge-patch
 
@@ -139,7 +139,7 @@ Docs: https://docs.openclaw.ai/gateway/configuration
 - `src/security/`. Security audit (`openclaw security audit`), scan path helpers, fix application.
 
 ### Browser
-- `src/browser/`. Chromium automation via Playwright CDP. Screenshot normalization, AX tree traversal. Simplified to autoConnect-only (headless/remote MCP attach modes and chrome-relay auto-creation were dropped).
+- `extensions/browser/src/browser/`. Chromium automation via Playwright CDP. Screenshot normalization, AX tree traversal. Simplified to autoConnect-only (headless/remote MCP attach modes and chrome-relay auto-creation were dropped). (Moved from `src/browser/` in Mar 27 sync 3.)
 
 ### TTS
 - `src/tts/`. Text-to-speech via ElevenLabs/OpenAI/Edge TTS APIs.
@@ -173,7 +173,7 @@ Below is a conceptual pipeline. Exact details vary by channel.
 
 1.5) **Input sanitization**
 - Strip platform envelope metadata from user messages (`src/gateway/chat-sanitize.ts`)
-- Reject null bytes and strip unsafe control characters (`src/gateway/server-methods/chat.ts:255`)
+- Reject null bytes and strip unsafe control characters (`src/gateway/server-methods/chat.ts:265`)
 
 2) **Identity + authorization**
 - Resolve sender identity.
