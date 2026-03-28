@@ -327,6 +327,18 @@
 - [Mar 27 sync 2 (75 commits, 11 security)](./post-merge-hardening/2026-03-27-sync-2.md)
 - [Mar 27 sync 3 (75 commits, 7 security)](./post-merge-hardening/2026-03-27-sync-3.md)
 - [Mar 27 sync 4 (75 commits, 10 security)](./post-merge-hardening/2026-03-27-sync-4.md)
+- [Mar 28 sync 1 (75 commits, 9 security)](./post-merge-hardening/2026-03-28-sync-1.md)
+- [Mar 28 sync 2 (77 commits, 6 security)](./post-merge-hardening/2026-03-28-sync-2.md)
+- [Mar 28 sync 3 (75 commits, 23 security)](./post-merge-hardening/2026-03-28-sync-3.md)
+- [Mar 28 sync 4 (75 commits, 0 security)](./post-merge-hardening/2026-03-28-sync-4.md)
+- [Mar 29 sync 1 (75 commits, 4 security)](./post-merge-hardening/2026-03-29-sync-1.md)
+- [Mar 29 sync 2 (75 commits, 14 security)](./post-merge-hardening/2026-03-29-sync-2.md)
+- [Mar 29 sync 3 (75 commits, 0 security)](./post-merge-hardening/2026-03-29-sync-3.md)
+- [Mar 29 sync 4 (75 commits, 8 security)](./post-merge-hardening/2026-03-29-sync-4.md)
+- [Mar 29 sync 5 (75 commits, 5 security)](./post-merge-hardening/2026-03-29-sync-5.md)
+- [Mar 29 sync 6 (75 commits, 9 security)](./post-merge-hardening/2026-03-29-sync-6.md)
+- [Mar 29 sync 7 (75 commits, 2 security)](./post-merge-hardening/2026-03-29-sync-7.md)
+- [Mar 29 sync 8 (34 commits, 2 security)](./post-merge-hardening/2026-03-29-sync-8.md)
 
 ## Post-Merge Security Hardening
 

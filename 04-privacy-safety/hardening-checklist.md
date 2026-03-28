@@ -283,7 +283,7 @@ openclaw config set tools.profile coding
 openclaw config set tools.deny '["gateway"]'
 ```
 
-Source: `src/agents/tool-catalog.ts:256-268` (tool profiles), `src/agents/tool-policy.ts:31-57` (owner-only fallback), `src/agents/tools/gateway-tool.ts:77` (ownerOnly), `src/agents/tools/gateway.ts:147` (least-privilege scopes), `src/gateway/server-methods.ts:104-107` (scope enforcement)
+Source: `src/agents/tool-catalog.ts:264-280` (tool profiles), `src/agents/tool-policy.ts:31-57` (owner-only fallback), `src/agents/tools/gateway-tool.ts:145` (ownerOnly), `src/agents/tools/gateway.ts:147` (least-privilege scopes), `src/gateway/server-methods.ts:104-107` (scope enforcement)
 
 **Keep config commands disabled** (defense-in-depth):
 
@@ -474,7 +474,7 @@ If you run a reverse proxy that handles TLS, you can also set HSTS and other sec
 openclaw config set gateway.http.securityHeaders.strictTransportSecurity "max-age=63072000; includeSubDomains"
 ```
 
-Source: `src/config/schema.labels.ts:104`, `src/config/schema.help.ts:133-135`
+Source: `src/config/schema.labels.ts:106`, `src/config/schema.help.ts:133-135`
 
 ---
 

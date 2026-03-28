@@ -281,7 +281,7 @@ X-Goog-Api-Client: google-cloud-sdk vscode_cloudshelleditor/0.1
 
 The Gateway uses WebSocket-based client identification for its internal control protocol. These identifiers are **not sent over external HTTP** — they exist only in the Gateway ↔ client communication channel.
 
-**Source:** `src/gateway/protocol/client-info.ts:1-14`
+**Source:** `src/gateway/protocol/client-info.ts:1-15`
 ```typescript
 export const GATEWAY_CLIENT_IDS = {
   WEBCHAT_UI: "webchat-ui",
@@ -301,7 +301,7 @@ export const GATEWAY_CLIENT_IDS = {
 
 Each client also sends metadata:
 
-**Source:** `src/gateway/protocol/client-info.ts:34-43`
+**Source:** `src/gateway/protocol/client-info.ts:35-44`
 ```typescript
 export type GatewayClientInfo = {
   id: GatewayClientId;
@@ -597,7 +597,7 @@ OpenClaw's HTTP API endpoints read several custom headers from inbound requests.
 | `x-openclaw-session-key` | `src/gateway/http-utils.ts:71` | Session pinning — pins request to a specific named session | `/v1/chat/completions`, `/v1/responses` |
 | `x-openclaw-token` | `src/gateway/hooks.ts:147-148` | Webhook authentication — alternative to `Authorization: Bearer` | `/hooks/*` |
 | `x-openclaw-message-channel` | `src/gateway/tools-invoke-http.ts:213` | Tool policy routing — specifies channel context (e.g., `"discord"`, `"slack"`) | `/tools/invoke` |
-| `x-openclaw-account-id` | `src/gateway/tools-invoke-http.ts:215` | Account-level tool policy routing | `/tools/invoke` |
+| `x-openclaw-account-id` | `src/gateway/tools-invoke-http.ts:216` | Account-level tool policy routing | `/tools/invoke` |
 
 ### WAF rules for inbound Gateway protection
 

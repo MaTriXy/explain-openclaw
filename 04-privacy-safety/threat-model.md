@@ -216,7 +216,7 @@ The Gateway can advertise itself on the local network via mDNS (Bonjour), using 
 | `cliPath` | -- | Yes |
 | `sshPort` | -- | Yes |
 
-Source: `src/infra/bonjour.ts:12-26` (opts type), `src/infra/bonjour.ts:155-169` (minimal conditionals), `src/gateway/server-discovery-runtime.ts:19,23-30` (mdnsMode logic)
+Source: `src/infra/bonjour.ts:12-26` (opts type), `src/infra/bonjour.ts:181-193` (minimal conditionals), `src/gateway/server-discovery-runtime.ts:19,23-30` (mdnsMode logic)
 
 **Risk:** In "full" mode, the broadcast includes `cliPath` (filesystem structure) and `sshPort` (attack vector). Even in "minimal" mode, the Gateway port and hostname are visible to anyone on the LAN segment.
 
@@ -307,7 +307,7 @@ For convenience, OpenClaw provides named tool profiles that map to common use ca
 | `messaging` | Communication tasks | Messaging group, session management |
 | `full` | Unrestricted | All tools (empty allow list = no restrictions) |
 
-Source: `src/agents/tool-catalog.ts:256-268` (`CORE_TOOL_PROFILES`)
+Source: `src/agents/tool-catalog.ts:264-280` (`CORE_TOOL_PROFILES`)
 
 ### DM session isolation
 

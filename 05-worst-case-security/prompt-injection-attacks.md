@@ -1097,7 +1097,7 @@ The gateway tool's `config.patch` action uses a **separate control plane** from 
 
 So this still works even when `/config set` is disabled (`commands.config: false` + `configWrites: false`) if the gateway tool remains available to that owner session.
 
-**Source:** `src/agents/tools/gateway-tool.ts:77,197-208`, `src/agents/tools/gateway.ts:147`, `src/gateway/server-methods.ts:39-66,104-129`, `src/auto-reply/reply/commands-config.ts:39,54-72`
+**Source:** `src/agents/tools/gateway-tool.ts:145,257-289`, `src/agents/tools/gateway.ts:147`, `src/gateway/server-methods.ts:39-66,104-129`, `src/auto-reply/reply/commands-config.ts:39,54-72`
 
 **Defense:**
 
@@ -1111,7 +1111,7 @@ openclaw config set tools.profile coding
 openclaw config set tools.deny '["gateway"]'
 ```
 
-Source: `src/agents/tool-catalog.ts:256-268`
+Source: `src/agents/tool-catalog.ts:264-280`
 
 Cross-reference: [AI Self-Misconfiguration Guide](./ai-self-misconfiguration.md)
 

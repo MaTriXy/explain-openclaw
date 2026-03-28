@@ -11,12 +11,12 @@
 | [#8512](https://github.com/openclaw/openclaw/issues/8512) | ~~CRITICAL~~ WONTFIX | Plugin HTTP routes bypass gateway authentication | Closed upstream as NOT_PLANNED (2026-03-07); opt-in auth added via `matchedPluginRoutesRequireGatewayAuth()` (`route.auth==="gateway"`) but not enforced by default; still affects plugin routes without explicit auth config at `src/gateway/server/plugins-http.ts:79-83` |
 | [#20683](https://github.com/openclaw/openclaw/issues/20683) | ~~HIGH~~ FIXED | Control UI allows token-only auth over HTTP (allowInsecureAuth bypass) | Fixed upstream (COMPLETED); `src/gateway/server/ws-connection/connect-policy.ts:22-34` |
 | [#50022](https://github.com/openclaw/openclaw/issues/50022) | ~~HIGH~~ FIXED | WS scope stripping on missing Origin header bypasses dangerouslyDisableDeviceAuth | Fixed by PR [#50101](https://github.com/openclaw/openclaw/pull/50101) (COMPLETED 2026-03-18); `clearUnboundScopes()` no longer strips scopes for valid-token connections with absent Origin; local commit `7b61ca1b06` |
-| [#50640](https://github.com/openclaw/openclaw/issues/50640) | ~~HIGH~~ FIXED LOCALLY | Silent auto-approval of scope-upgrade pairing requests for local Control UI | FIXED locally by commit `81ebc7e034` (Mar 26 sync 5): `src/gateway/server/ws-connection/message-handler.ts:783` now forces `silent: false` for scope-upgrade reasons via `reason === "scope-upgrade" ? false : allowSilentLocalPairing`; previously `shouldAllowSilentLocalPairing()` returned `true` for scope-upgrade on local Control UI/Webchat connections, allowing silent privilege escalation |
+| [#50640](https://github.com/openclaw/openclaw/issues/50640) | ~~HIGH~~ FIXED LOCALLY | Silent auto-approval of scope-upgrade pairing requests for local Control UI | FIXED locally by commit `81ebc7e034` (Mar 26 sync 5): `src/gateway/server/ws-connection/message-handler.ts:788` now forces `silent: false` for scope-upgrade reasons via `reason === "scope-upgrade" ? false : allowSilentLocalPairing`; previously `shouldAllowSilentLocalPairing()` returned `true` for scope-upgrade on local Control UI/Webchat connections, allowing silent privilege escalation |
 | [#17936](https://github.com/openclaw/openclaw/issues/17936) | HIGH | message/sendAttachment exfiltrates local files when sandbox disabled | `src/infra/outbound/message-action-params.ts:279-280` — `normalizeSandboxMediaParams()` skips path validation when `sandboxRoot` absent; default sandbox-off mode is affected |
-| [#50626](https://github.com/openclaw/openclaw/issues/50626) | HIGH | IDOR: device.token.rotate — any operator.pairing client can rotate another device's token | `src/gateway/server-methods/devices.ts:177-254` — handler checks device exists and caller scopes, but no `client.connect.deviceId === params.deviceId` ownership check; any device with `operator.pairing` scope can rotate any other device's token and receive plaintext credential |
+| [#50626](https://github.com/openclaw/openclaw/issues/50626) | HIGH | IDOR: device.token.rotate — any operator.pairing client can rotate another device's token | `src/gateway/server-methods/devices.ts:180-268` — handler checks device exists and caller scopes, but no `client.connect.deviceId === params.deviceId` ownership check; any device with `operator.pairing` scope can rotate any other device's token and receive plaintext credential |
 | [#20305](https://github.com/openclaw/openclaw/issues/20305) | ~~HIGH~~ WONTFIX | message tool cross-user sends in multi-tenant deployments (no per-agent scoping) | Closed upstream as NOT_PLANNED (2026-03-24); `src/infra/outbound/message-action-runner.ts` — no `allowedRecipients` or per-agent channel filtering; affects deployments with `dmScope: "per-channel-peer"` and 200+ agents |
 | [#3277](https://github.com/openclaw/openclaw/issues/3277) | ~~HIGH~~ FIXED | Path validation bypass via `startsWith` prefix | Fixed upstream (COMPLETED 2026-02-15, consolidated Feb 19 sync 2); `src/infra/archive-path.ts:12,50` - `validateArchiveEntryPath()` + `resolveArchiveOutputPath()` (hardened Feb 15, consolidated to module Feb 19) |
-| [#4949](https://github.com/openclaw/openclaw/issues/4949) | HIGH (WONTFIX) | Browser control server DNS rebinding | Closed upstream as NOT_PLANNED (2026-02-17); still affects local code at `extensions/browser/src/server.ts:68`; no Host header validation |
+| [#4949](https://github.com/openclaw/openclaw/issues/4949) | HIGH (WONTFIX) | Browser control server DNS rebinding | Closed upstream as NOT_PLANNED (2026-02-17); still affects local code at `extensions/browser/src/server.ts:69`; no Host header validation |
 | [#4950](https://github.com/openclaw/openclaw/issues/4950) | HIGH (WONTFIX) | Arbitrary JS execution via browser evaluate (default on) | Closed upstream as NOT_PLANNED (2026-02-17); still affects local code at `extensions/browser/src/browser/constants.ts:2` - `DEFAULT_BROWSER_EVALUATE_ENABLED = true` |
 | [#4995](https://github.com/openclaw/openclaw/issues/4995) | HIGH (WONTFIX) | iMessage dmPolicy auto-responds with pairing codes | Closed upstream as NOT_PLANNED (2026-03-01); still affects local code at `src/imessage/monitor/monitor-provider.ts:120,247-278` |
 | [#5052](https://github.com/openclaw/openclaw/issues/5052) | ~~HIGH~~ FIXED | Config validation fail-open returns `{}` | Fixed upstream (COMPLETED 2026-03-07); commit `f53e10e3f` — `src/config/io.ts:1333` now throws `INVALID_CONFIG` error instead of returning `{}`; fail-closed behavior confirmed locally |
@@ -44,9 +44,9 @@
 | [#4940](https://github.com/openclaw/openclaw/issues/4940) | MEDIUM (WONTFIX) | commands.restart bypass via exec tool | Closed upstream as NOT_PLANNED (2026-03-01); still affects local code at `src/agents/bash-tools.exec.ts` (no commands.restart check) |
 | [#5120](https://github.com/openclaw/openclaw/issues/5120) | ~~MEDIUM~~ FIXED | Webhook token accepted via query parameters | Fixed in PR [#9436](https://github.com/openclaw/openclaw/pull/9436) — query token extraction removed from `src/gateway/hooks.ts`; upstream issue confirmed CLOSED/NOT_PLANNED (2026-02-17) |
 | [#5122](https://github.com/openclaw/openclaw/issues/5122) | ~~MEDIUM~~ WONTFIX | readJsonBody() Slowloris DoS (no read timeout) | Closed upstream as NOT_PLANNED (2026-02-17); local mitigation remains: `src/gateway/hooks.ts:156-175` delegates to `readJsonBodyWithLimit()` with 30s timeout (commit `3cbcba10c`) |
-| [#5123](https://github.com/openclaw/openclaw/issues/5123) | ~~MEDIUM (WONTFIX)~~ FIXED LOCALLY | ReDoS in session filter regex | Closed upstream NOT_PLANNED (2026-02-17); fixed locally by `a2dfe9879` (Feb 24 sync 7): `matchSessionFilter()` now uses `compileConfigRegex()` at `src/infra/exec-approval-forwarder.ts:60-69` |
+| [#5123](https://github.com/openclaw/openclaw/issues/5123) | ~~MEDIUM (WONTFIX)~~ FIXED LOCALLY | ReDoS in session filter regex | Closed upstream NOT_PLANNED (2026-02-17); fixed locally by `a2dfe9879` (Feb 24 sync 7): `matchSessionFilter()` now uses `compileConfigRegex()` at `src/infra/exec-approval-forwarder.ts:66-74` |
 | [#5124](https://github.com/openclaw/openclaw/issues/5124) | ~~MEDIUM~~ FIXED | ReDoS in log redaction patterns | Fixed upstream (COMPLETED 2026-02-14); `src/logging/redact.ts:50-60` |
-| [#6021](https://github.com/openclaw/openclaw/issues/6021) | MEDIUM (WONTFIX) | Timing attack in non-gateway token comparisons | Closed upstream as NOT_PLANNED (2026-02-13); fully mitigated locally ��� node token uses `verifyPairingToken()` at `src/infra/node-pairing.ts:214` which delegates to `safeEqualSecret()` (constant-time) |
+| [#6021](https://github.com/openclaw/openclaw/issues/6021) | MEDIUM (WONTFIX) | Timing attack in non-gateway token comparisons | Closed upstream as NOT_PLANNED (2026-02-13); fully mitigated locally ��� node token uses `verifyPairingToken()` at `src/infra/node-pairing.ts:260` which delegates to `safeEqualSecret()` (constant-time) |
 | [#7862](https://github.com/openclaw/openclaw/issues/7862) | ~~MEDIUM~~ FIXED | Session transcripts 644 instead of 600 (fixed upstream and locally) | Fixed upstream COMPLETED (2026-02-16); 0o600 fix applied upstream; `src/auto-reply/reply/session-fork.runtime.ts:45`, `src/agents/pi-embedded-runner/session-manager-init.ts`, `src/gateway/server-methods/sessions.ts` |
 | [#8027](https://github.com/openclaw/openclaw/issues/8027) | ~~MEDIUM~~ FIXED | web_fetch hidden text prompt injection | Fixed upstream (COMPLETED); `src/agents/tools/web-fetch-utils.ts:59-61` |
 | [#8592](https://github.com/openclaw/openclaw/issues/8592) | ~~MEDIUM~~ FIXED | No detection of encoded/obfuscated commands | Fixed upstream (COMPLETED); `src/infra/exec-safety.ts:1-44` |
@@ -59,12 +59,12 @@
 | [#10324](https://github.com/openclaw/openclaw/issues/10324) | MEDIUM (WONTFIX) | Memory index multi-write lacks transactions | Closed upstream as NOT_PLANNED (2026-02-24); still affects local code at `src/memory/manager-embedding-ops.ts:693-805` (DELETEs+INSERTs without BEGIN/COMMIT) |
 | [#10326](https://github.com/openclaw/openclaw/issues/10326) | ~~MEDIUM~~ FIXED | Child process stop() lacks SIGKILL escalation | Fixed upstream (COMPLETED 2026-02-14); `src/imessage/client.ts:110-131`, `src/signal/daemon.ts:96-100` |
 | [#10330](https://github.com/openclaw/openclaw/issues/10330) | MEDIUM (WONTFIX) | TOCTOU race in device auth token storage | Closed upstream as NOT_PLANNED (2026-02-24); still affects local code at `src/shared/device-auth-store.ts:31-57` (read+write with no lock) |
-| [#10331](https://github.com/openclaw/openclaw/issues/10331) | ~~MEDIUM~~ FIXED | Session store stale cache inside write lock | Fixed upstream (COMPLETED 2026-02-14); `src/config/sessions/store.ts:782,748` |
+| [#10331](https://github.com/openclaw/openclaw/issues/10331) | ~~MEDIUM~~ FIXED | Session store stale cache inside write lock | Fixed upstream (COMPLETED 2026-02-14); `src/config/sessions/store.ts:835,801` |
 | [#10333](https://github.com/openclaw/openclaw/issues/10333) | ~~MEDIUM~~ FIXED | BlueBubbles filename multipart header injection | Fixed in PR [#11093](https://github.com/openclaw/openclaw/pull/11093) — `sanitizeFilename()` at `extensions/bluebubbles/src/attachments.ts:38` |
 | [#10646](https://github.com/openclaw/openclaw/issues/10646) | ~~HIGH~~ FIXED | Weak UUID: Math.random() fallback + tool call IDs | Closed upstream as NOT_PLANNED (2026-02-24); `ui/src/ui/uuid.ts:23-33` (fallback, low-risk) remains; **tool call ID fixed** by commit `265386cd6b` (Mar 22 sync 1) — `src/auto-reply/reply/get-reply-inline-actions.ts:242` now uses `generateSecureToken(8)` |
 | [#7139](https://github.com/openclaw/openclaw/issues/7139) | ~~MEDIUM~~ FIXED | Default config: sandbox off, plaintext creds | Fixed upstream (COMPLETED); `src/agents/sandbox/config.ts:244` — sandbox default changed |
 | [#9875](https://github.com/openclaw/openclaw/issues/9875) | MEDIUM (WONTFIX) | Orphaned tool_use blocks from backgrounded exec | Closed upstream as NOT_PLANNED (2026-03-01); still affects local code at `src/agents/session-transcript-repair.ts:349` (reactive repair, not proactive) |
-| [#11900](https://github.com/openclaw/openclaw/issues/11900) | ~~MEDIUM~~ WONTFIX | Context files (USER.md, SOUL.md) loaded for all senders | Closed upstream as NOT_PLANNED (2026-03-25); `src/agents/bootstrap-files.ts:64-96` — no `senderIsOwner` check; `attempt.ts:1726` calls unconditionally |
+| [#11900](https://github.com/openclaw/openclaw/issues/11900) | ~~MEDIUM~~ WONTFIX | Context files (USER.md, SOUL.md) loaded for all senders | Closed upstream as NOT_PLANNED (2026-03-25); `src/agents/bootstrap-files.ts:64-96` — no `senderIsOwner` check; `attempt.ts:365` calls unconditionally |
 | [#50628](https://github.com/openclaw/openclaw/issues/50628) | MEDIUM | Browser control server installs no authentication when gateway auth mode is trusted-proxy | `extensions/browser/src/browser/control-auth.ts:65-67` — `ensureBrowserControlAuth()` returns empty auth object for `trusted-proxy` mode; `installBrowserAuthMiddleware` skips when token+password both undefined; browser automation API accessible to any loopback process without auth |
 | [#50630](https://github.com/openclaw/openclaw/issues/50630) | MEDIUM | Tailscale serve + auth.mode=none bypasses startup validation | `src/gateway/server-runtime-config.ts:125` — funnel mode validates `authMode !== "password"` and errors; no equivalent guard for `tailscale.mode=serve` + `auth.mode=none`; config combination exposes gateway to all Tailnet peers without authentication |
 | [#50635](https://github.com/openclaw/openclaw/issues/50635) | MEDIUM | `*.ts.net` Host header accepted as local-direct — bypasses gateway token auth | `src/gateway/net.ts:361` — `isLocalishHost()` returns `true` for any `*.ts.net` Host header; `src/gateway/auth.ts:136` — `isLocalDirectRequest()` trusts this header; any loopback process can forge `Host: evil.ts.net` to bypass canvas/readiness/a2ui endpoint auth |
@@ -87,13 +87,13 @@
 | [#11431](https://github.com/openclaw/openclaw/issues/11431) | ~~CRITICAL~~ FIXED | Hook/plugin npm install runs lifecycle scripts (no --ignore-scripts) | Fixed in PRs: `92702af7a` (plugins+hooks, Feb 12 sync 1) + [#14659](https://github.com/openclaw/openclaw/pull/14659) (skills, Feb 13 sync 1) — `--ignore-scripts` added to all install commands |
 | [#11023](https://github.com/openclaw/openclaw/issues/11023) | HIGH (WONTFIX) | Sandbox browser bridge started without auth token | Closed upstream as NOT_PLANNED (2026-02-13); `startBrowserBridgeServer` called at `src/agents/sandbox/browser.ts:355-366` WITH `authToken` and `authPassword` (line ref updated Mar 1 sync 1; auth IS present); relates to #6609 |
 | [#11945](https://github.com/openclaw/openclaw/issues/11945) | HIGH (WONTFIX) | config.patch bypasses commands.restart restriction | Closed upstream as NOT_PLANNED (2026-02-13); still affects local code at `src/gateway/server-methods/config.ts:446` |
-| [#13683](https://github.com/openclaw/openclaw/issues/13683) | ~~HIGH~~ FIXED | CLI `config get` returns unredacted secrets to sandboxed agents | Fixed upstream (COMPLETED 2026-02-14); `src/cli/config-cli.ts:1137-1139` |
+| [#13683](https://github.com/openclaw/openclaw/issues/13683) | ~~HIGH~~ FIXED | CLI `config get` returns unredacted secrets to sandboxed agents | Fixed upstream (COMPLETED 2026-02-14); `src/cli/config-cli.ts:1116-1118` |
 | [#13786](https://github.com/openclaw/openclaw/issues/13786) | ~~HIGH~~ FIXED | BlueBubbles webhook auth bypass via loopback proxy trust | Fixed in PR [#13787](https://github.com/openclaw/openclaw/pull/13787) — loopback bypass removed; all requests require password auth |
 | [#13718](https://github.com/openclaw/openclaw/issues/13718) | ~~HIGH~~ FIXED | Unauthenticated Nostr profile API allows remote config tampering | Fixed in PR [#13719](https://github.com/openclaw/openclaw/pull/13719) — gateway-auth required for `/api/channels/` plugin routes (`server-http.ts:518-533`) |
 | [#13937](https://github.com/openclaw/openclaw/issues/13937) | ~~MEDIUM~~ FIXED | HTML not escaped in Control UI webchat (XSS) | Closed as COMPLETED 2026-02-11; `ui/` webchat HTML escaping fix applied upstream |
 | [#14137](https://github.com/openclaw/openclaw/issues/14137) | ~~HIGH~~ FIXED | Gateway auth has no rate limiting (CWE-307) | Fixed upstream (COMPLETED); `src/gateway/auth.ts` — rate limiting added |
-| [#13274](https://github.com/openclaw/openclaw/issues/13274) | ~~HIGH~~ FIXED | SSRF guard bypassed by IPv4-compatible IPv6 addresses | Fixed by `c0c0e0f9a` — `isPrivateIpAddress()` (`src/infra/net/ssrf.ts:116`) now handles full-form IPv4-mapped IPv6 via `extractEmbeddedIpv4FromIpv6()` at `src/shared/net/ip.ts:279` |
-| [#11738](https://github.com/openclaw/openclaw/issues/11738) | ~~HIGH~~ FIXED | Canvas authorization IP co-tenancy bypass | Fixed upstream (COMPLETED 2026-02-24); `src/gateway/server-http.ts:858-867` — canvas auth no longer relies on IP co-tenancy |
+| [#13274](https://github.com/openclaw/openclaw/issues/13274) | ~~HIGH~~ FIXED | SSRF guard bypassed by IPv4-compatible IPv6 addresses | Fixed by `c0c0e0f9a` — `isPrivateIpAddress()` (`src/infra/net/ssrf.ts:116`) now handles full-form IPv4-mapped IPv6 via `extractEmbeddedIpv4FromIpv6()` at `src/shared/net/ip.ts:287` |
+| [#11738](https://github.com/openclaw/openclaw/issues/11738) | ~~HIGH~~ FIXED | Canvas authorization IP co-tenancy bypass | Fixed upstream (COMPLETED 2026-02-24); `src/gateway/server-http.ts:904-936` — canvas auth no longer relies on IP co-tenancy |
 | [#11793](https://github.com/openclaw/openclaw/issues/11793) | HIGH (WONTFIX) | HTTP API session keys lack ownership validation | Closed upstream as NOT_PLANNED; still affects local code at `src/gateway/http-utils.ts:71-73` — `x-openclaw-session-key` header accepted as-is with no ownership check |
 | [#11024](https://github.com/openclaw/openclaw/issues/11024) | ~~HIGH~~ FIXED | Gmail push endpoint embeds auth token in URL query string | Fixed upstream (COMPLETED 2026-02-14); `src/hooks/gmail-setup-utils.ts:315` |
 | [#11811](https://github.com/openclaw/openclaw/issues/11811) | ~~HIGH~~ FIXED | MSTeams attachment fetch follows redirects before allowlist checks (SSRF) | Fixed upstream (COMPLETED); `extensions/msteams/src/attachments/download.ts:93` |
@@ -101,7 +101,7 @@
 | [#15950](https://github.com/openclaw/openclaw/issues/15950) | ~~HIGH~~ FIXED | Android production build permits cleartext traffic globally | Fixed upstream (COMPLETED); `apps/android/.../network_security_config.xml:4` |
 | [#14875](https://github.com/openclaw/openclaw/issues/14875) | ~~HIGH~~ FIXED | Feishu channel hardcodes CommandAuthorized bypassing access groups | Fixed upstream (COMPLETED 2026-02-13); `extensions/feishu/src/bot.ts:932` |
 | [#14117](https://github.com/openclaw/openclaw/issues/14117) | ~~MEDIUM~~ FIXED | Session isolation & message attribution failure | Fixed upstream (COMPLETED 2026-02-14); cross-session message leakage; relates to #12571 |
-| [#14808](https://github.com/openclaw/openclaw/issues/14808) | ~~MEDIUM~~ FIXED LOCALLY (WONTFIX upstream) | apiKey resolved to plaintext in models.json cache | Closed upstream as NOT_PLANNED (2026-02-13); fixed locally by `17ab46aed` (Mar 8 sync 3) — `normalizeProviders()` now reverse-looks up env var names at `src/agents/models-config.providers.ts:483`, replacing resolved plaintext apiKeys before writing models.json; relates to #9627/#13683 |
+| [#14808](https://github.com/openclaw/openclaw/issues/14808) | ~~MEDIUM~~ FIXED LOCALLY (WONTFIX upstream) | apiKey resolved to plaintext in models.json cache | Closed upstream as NOT_PLANNED (2026-02-13); fixed locally by `17ab46aed` (Mar 8 sync 3) — `normalizeProviders()` now reverse-looks up env var names at `src/agents/models-config.providers.normalize.ts:19`, replacing resolved plaintext apiKeys before writing models.json; relates to #9627/#13683 |
 | [#11202](https://github.com/openclaw/openclaw/issues/11202) | MEDIUM | Model catalog apiKeys injected into LLM prompt context every turn | `src/agents/models-config.ts` — `normalizeProviders()` includes resolved `apiKey` in model catalog serialized to LLM; all provider keys sent to active provider |
 | [#16059](https://github.com/openclaw/openclaw/issues/16059) | ~~MEDIUM~~ FIXED | Extension relay /extension WebSocket unauthenticated | Fixed upstream (sync 15); `extensions/browser/extensions/browser/src/browser/extension-relay.ts` (removed) — `/extension` path required `relayAuthToken` (same as `/cdp`); entire extension relay removed by commit `476d948732` (Mar 17 sync 3) |
 | [#10992](https://github.com/openclaw/openclaw/issues/10992) | ~~MEDIUM~~ FIXED | Sub-agents bypass exec approvals for safeBins commands | Fixed upstream (COMPLETED); `safeBins`/`resolveExecApprovals` removed by upstream refactor |
@@ -151,8 +151,8 @@
 | [#21084](https://github.com/openclaw/openclaw/issues/21084) | MEDIUM | HALLUCINATION | Session JSONL not persisted on crash (data loss) | `src/auto-reply/reply/session.ts` — crash during write loses session transcript; no fsync/WAL |
 | [#25795](https://github.com/openclaw/openclaw/issues/25795) | ~~MEDIUM~~ WONTFIX | CONTEXT_MGMT | Suspicious 'System: Post-Compaction Audit' injected into conversation — potential prompt injection surface | Closed upstream as NOT_PLANNED (2026-03-01); still affects local code at `src/agents/pi-extensions/compaction-safeguard.ts` — post-compaction audit injects System: prefixed message; same format as #21656 spoofing surface |
 | [#25647](https://github.com/openclaw/openclaw/issues/25647) | ~~MEDIUM~~ FIXED | TOOL_CALL | transcript-sanitize pi-extension never loaded — orphaned tool_result possible via extension path | Fixed upstream (COMPLETED 2026-03-01); `src/agents/pi-embedded-runner/extensions.ts` — extension loading path repaired |
-| [#25392](https://github.com/openclaw/openclaw/issues/25392) | ~~MEDIUM~~ FIXED | CONTEXT_MGMT | Default AGENTS.md template headings mismatch compaction code — critical context lost after every compaction | Fixed upstream (96021a2b1 Mar 5 sync 2); `src/agents/pi-extensions/compaction-safeguard.ts:520-524` now falls back to legacy section names (`"Every Session"`, `"Safety"`) so extraction succeeds regardless of AGENTS.md template version |
-| [#29363](https://github.com/openclaw/openclaw/issues/29363) | MEDIUM | PERSONA_DRIFT | Subagent sessions inject ALL workspace files instead of AGENTS.md + TOOLS.md only | `src/agents/bootstrap-files.ts:52-55` — `applyContextModeFilter()` only restricts when `contextMode==="lightweight"` (not set for subagents); `src/agents/pi-embedded-runner/run/attempt.ts:1732` — `bootstrapContextMode` not set for subagent sessions; SOUL.md, IDENTITY.md, USER.md all injected |
+| [#25392](https://github.com/openclaw/openclaw/issues/25392) | ~~MEDIUM~~ FIXED | CONTEXT_MGMT | Default AGENTS.md template headings mismatch compaction code — critical context lost after every compaction | Fixed upstream (96021a2b1 Mar 5 sync 2); `src/agents/pi-extensions/compaction-safeguard.ts:539-542` now falls back to legacy section names (`"Every Session"`, `"Safety"`) so extraction succeeds regardless of AGENTS.md template version |
+| [#29363](https://github.com/openclaw/openclaw/issues/29363) | MEDIUM | PERSONA_DRIFT | Subagent sessions inject ALL workspace files instead of AGENTS.md + TOOLS.md only | `src/agents/bootstrap-files.ts:52-55` — `applyContextModeFilter()` only restricts when `contextMode==="lightweight"` (not set for subagents); `src/agents/pi-embedded-runner/run/attempt.ts:371` — `bootstrapContextMode` not set for subagent sessions; SOUL.md, IDENTITY.md, USER.md all injected |
 | [#41100](https://github.com/openclaw/openclaw/issues/41100) | LOW | CONTEXT_MGMT | Compaction safeguard fails silently — returns `cancel: true` without `reason` field | `src/agents/pi-extensions/compaction-safeguard.ts` — hook cancels compaction without reason; user sees "Compaction cancelled" with no actionable explanation |
 
 ### Category Tags
@@ -173,7 +173,7 @@
 
 2. **Tool call IDs** (`src/auto-reply/reply/get-reply-inline-actions.ts:244`): **Fixed by commit `265386cd6b` (Mar 22 sync 1)** — now uses `generateSecureToken(8)` (Node.js `crypto` module, 8 bytes of cryptographically secure random data) instead of `Math.random()`.
 
-**Secondary:** Tmp file suffixes in `src/cron/store.ts:140`, `src/cron/run-log.ts:130-131`, `extensions/browser/src/browser/trash.ts:16` (low risk, collision-resistant via PID/timestamp). Note: `src/tts/tts.ts:422` formerly on this list now uses `randomBytes(8).toString("hex")` (fixed by commit `662031a88e`, Mar 17 sync 5).
+**Secondary:** Tmp file suffixes in `src/cron/store.ts:146` (uses `randomBytes(8).toString("hex")`), `src/cron/run-log.ts:130-131`, `extensions/browser/src/browser/trash.ts:16` (low risk, collision-resistant via PID/timestamp). Note: `src/tts/tts.ts` formerly on this list — tts.ts is now a 36-line re-export barrel; TTS implementation moved to `plugin-sdk/speech-runtime.js`.
 
 **Confirmed safe:** 52 files use `crypto.randomUUID`/`randomBytes` for proper crypto paths.
 
@@ -310,8 +310,8 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** Gateway HTTP server serves Canvas host and A2UI endpoints without enforcing gateway auth, allowing unauthenticated access to canvas files.
 
 **Affected code:**
-- `src/gateway/server-http.ts:858-867` - Canvas/A2UI handler dispatch (now auth-wrapped via `authorizeCanvasRequest()` at `src/gateway/server/http-auth.ts:57`, PR #9518)
-- `src/gateway/server-http.ts:959-1013` - WebSocket upgrade for canvas (`attachGatewayUpgradeHandler`; canvas WS auth-wrapped via `authorizeCanvasRequest()` at `server-http.ts:837`, PR #9518)
+- `src/gateway/server-http.ts:904-936` - Canvas/A2UI handler dispatch (now auth-wrapped via `authorizeCanvasRequest()` at `src/gateway/server/http-auth.ts:57`, PR #9518)
+- `src/gateway/server-http.ts:1040-1062` - WebSocket upgrade for canvas (`attachGatewayUpgradeHandler`; canvas WS auth-wrapped via `authorizeCanvasRequest()` at `server-http.ts:837`, PR #9518)
 
 **Verification:**
 - No `authorizeGatewayConnect` call before `canvasHost.handleHttpRequest(req, res)`
@@ -326,7 +326,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 
 **Vulnerability:** Webhook endpoint accepted authentication tokens via URL query parameters, causing credential leakage through logs, browser history, and Referer headers.
 
-**Fix:** Query token extraction removed entirely from `src/gateway/hooks.ts`. `extractHookToken()` now only accepts `Authorization: Bearer` header and `X-OpenClaw-Token` header. Server returns HTTP 400 when `?token=` is present (`src/gateway/server-http.ts:475-479`).
+**Fix:** Query token extraction removed entirely from `src/gateway/hooks.ts`. `extractHookToken()` now only accepts `Authorization: Bearer` header and `X-OpenClaw-Token` header. Server returns HTTP 400 when `?token=` is present (`src/gateway/server-http.ts:492-498`).
 
 ### #4949: Browser Control Server DNS Rebinding
 
@@ -336,7 +336,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** Browser control server binds to `127.0.0.1` but performs no Host header validation. DNS rebinding attacks can bypass localhost restriction to reach browser automation endpoints from a remote origin.
 
 **Affected code:**
-- `extensions/browser/src/server.ts:68` - binds to `"127.0.0.1"` (middleware extracted to `extensions/browser/src/browser/server-middleware.ts:24-35`)
+- `extensions/browser/src/server.ts:69` - binds to `"127.0.0.1"` (middleware extracted to `extensions/browser/src/browser/server-middleware.ts:24-35`)
 - `extensions/browser/src/server.ts:20-87` - auth now required via `isAuthorizedBrowserRequest()` (commit `9230a2ae1`, refactored in `28014de97`), but still no Host header or origin validation
 
 **Partial mitigation (Feb 13 sync 5):** Commit `9230a2ae1` adds bearer token / password auth middleware to all browser control HTTP routes. DNS rebinding still possible but requests now need valid authentication credentials, significantly raising the bar. New `browser.control_no_auth` audit check flags when no auth is configured.
@@ -409,9 +409,9 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 
 **Affected code:**
 - `src/security/secret-equal.ts:3-16` - `safeEqualSecret` uses `timingSafeEqual` (correct)
-- `src/gateway/server-http.ts:494` - hook token now uses `safeEqualSecret()` (fixed in Feb 13 sync 4, commit `113ebfd6a`)
-- `src/infra/node-pairing.ts:214` - node token uses `verifyPairingToken()` which calls `safeEqualSecret()` (constant-time, mitigated)
-- `src/infra/device-pairing.ts:648` - device token verification uses `verifyPairingToken()` (wraps `safeEqualSecret()`, fixed in Feb 13 sync 4, commit `113ebfd6a`)
+- `src/gateway/server-http.ts:511` - hook token now uses `safeEqualSecret()` (fixed in Feb 13 sync 4, commit `113ebfd6a`)
+- `src/infra/node-pairing.ts:260` - node token uses `verifyPairingToken()` which calls `safeEqualSecret()` (constant-time, mitigated)
+- `src/infra/device-pairing.ts:649` - device token verification uses `verifyPairingToken()` (wraps `safeEqualSecret()`, fixed in Feb 13 sync 4, commit `113ebfd6a`)
 
 ### #6606: Telegram Webhook Binds to 0.0.0.0 with Optional Secret
 
@@ -439,7 +439,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Local status:** NOT FIXED — the 0o600 fix was applied in `ae0b110e4` but accidentally reverted by `9f261f592 revert: PR 18288 accidental merge`. Three sites remain unpatched:
 - ~~`src/auto-reply/reply/session-fork.ts:58`~~ — refactored to `src/auto-reply/reply/session-fork.runtime.ts:43`; now writes with `mode: 0o600` (FIXED in Mar 22 sync 2)
 - `src/agents/pi-embedded-runner/session-manager-init.ts` - no mode on session file reset
-- `src/gateway/server-methods/sessions.ts:1139` - `fs.writeFileSync(filePath, ..., "utf-8")` (no mode)
+- `src/gateway/server-methods/sessions.ts:1178` - `fs.writeFileSync(filePath, ..., "utf-8")` (no mode)
 
 ### #8516: Browser Download/Trace Endpoints Arbitrary File Write
 
@@ -555,7 +555,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 
 **Vulnerability:** Gateway authentication tokens were passed via URL query parameters (`?token=...`) in dashboard and onboarding flows, exposing credentials through logs, browser history, and Referer headers.
 
-**Fix:** Query token acceptance completely removed. `extractHookToken()` in `src/gateway/hooks.ts:137-155` no longer reads `url.searchParams`. `src/commands/dashboard.ts` no longer constructs `?token=` URLs. `src/commands/onboard-helpers.ts` no longer passes token in URL. Server now returns HTTP 400 when `?token=` is present (`src/gateway/server-http.ts:475-479`).
+**Fix:** Query token acceptance completely removed. `extractHookToken()` in `src/gateway/hooks.ts:137-155` no longer reads `url.searchParams`. `src/commands/dashboard.ts` no longer constructs `?token=` URLs. `src/commands/onboard-helpers.ts` no longer passes token in URL. Server now returns HTTP 400 when `?token=` is present (`src/gateway/server-http.ts:492-498`).
 
 ### #9627: Config Secrets Exposed in JSON After Update/Doctor
 
@@ -635,10 +635,10 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Severity:** MEDIUM
 **CWE:** CWE-863 (Incorrect Authorization)
 
-**Vulnerability:** The gateway tool correctly checks `commands.restart=true` before allowing restart actions (`src/agents/tools/gateway-tool.ts:84-87`), but the exec tool can run `openclaw gateway restart` without checking this config flag. The exec approval system (`src/infra/exec-approvals.ts`) only validates executable paths against allowlist patterns, not the semantic meaning of commands.
+**Vulnerability:** The gateway tool correctly checks `commands.restart=true` before allowing restart actions (`src/agents/tools/gateway-tool.ts:153-155`), but the exec tool can run `openclaw gateway restart` without checking this config flag. The exec approval system (`src/infra/exec-approvals.ts`) only validates executable paths against allowlist patterns, not the semantic meaning of commands.
 
 **Affected code:**
-- `src/agents/tools/gateway-tool.ts:84-87` - correctly checks `commands.restart` (this is the SECURE path)
+- `src/agents/tools/gateway-tool.ts:153-155` - correctly checks `commands.restart` (this is the SECURE path)
 - `src/agents/bash-tools.exec.ts` - no check for `commands.restart` (BYPASS path)
 - `src/infra/exec-approvals.ts` - no command-semantic filtering
 
@@ -737,9 +737,9 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Vulnerability:** Two session store write methods call `loadSessionStore()` without `skipCache: true`, reading stale cached data even though they hold the write lock. Concurrent requests to the same session can silently lose metadata updates.
 
 **Affected code:**
-- `src/config/sessions/store.ts:782` — `updateSessionStoreEntry()` inside `withSessionStoreLock()` calls `loadSessionStore(storePath)` **without `skipCache: true`**
-- `src/config/sessions/store.ts:748` — `withSessionStoreLock()` helper
-- `src/config/sessions/store.ts:568` — `updateSessionStore()` NOW correctly uses `{ skipCache: true }` (bug partially fixed in session pruning refactor)
+- `src/config/sessions/store.ts:842` — `updateSessionStoreEntry()` inside `withSessionStoreLock()` calls `loadSessionStore(storePath)` **without `skipCache: true`**
+- `src/config/sessions/store.ts:801` — `withSessionStoreLock()` helper
+- `src/config/sessions/store.ts:603` — `updateSessionStore()` NOW correctly uses `{ skipCache: true }` (bug partially fixed in session pruning refactor)
 
 **Impact:** 8 callers in hot paths (agent runner, channels, Slack, LINE, web) can lose session metadata updates under concurrent load.
 
@@ -785,8 +785,8 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 
 **Affected code:**
 - `src/agents/bootstrap-files.ts:64-96` — `resolveBootstrapContextForRun()` loads all bootstrap files unconditionally
-- `src/agents/pi-embedded-runner/run/attempt.ts:1726` — calls `resolveBootstrapContextForRun()` without `senderIsOwner`
-- `src/agents/pi-embedded-runner/run/attempt.ts:1780` — `senderIsOwner` only passed to `createOpenClawCodingTools()` for tool gating
+- `src/agents/pi-embedded-runner/run/attempt.ts:365` — calls `resolveBootstrapContextForRun()` without `senderIsOwner`
+- `src/agents/pi-embedded-runner/run/attempt.ts:438` — `senderIsOwner` only passed to `createOpenClawCodingTools()` for tool gating
 
 **Impact:** Non-owner senders on public channels receive responses shaped by the owner's personal context files (personality, preferences, private notes). The content is not directly exposed but indirectly leaks through response behavior. Tool access is correctly gated by `senderIsOwner`, but context/personality files are not.
 
@@ -798,7 +798,7 @@ A Docker sandbox implementation exists with proper isolation (`--network none`, 
 **Affected code:**
 - `src/auto-reply/reply/get-reply-directives.ts:87-102` — `resolveExecOverrides()` reads from `directives` (inline `!exec=docker`) and `sessionEntry` only
 - `src/auto-reply/reply/get-reply-directives.ts:110` — `agentCfg: AgentDefaults` is in scope but not consulted for exec settings
-- `src/agents/pi-embedded-runner/run/attempt.ts:1783` — `execOverrides` passed to tool creation, but populated only from directives/session
+- `src/agents/pi-embedded-runner/run/attempt.ts:422` — `execOverrides` passed to tool creation, but populated only from directives/session
 
 **Impact:** If an operator configures per-agent exec restrictions (e.g., `agents.mybot.tools.exec.host = "docker"` for sandboxed execution), those restrictions are silently ignored. The agent runs with global exec defaults. Global config still applies; only per-agent overrides are lost.
 
@@ -825,7 +825,7 @@ All changes take effect immediately via automatic restart.
 - `src/gateway/server-methods/config.ts:446,506` — writes config then calls `scheduleGatewaySigusr1Restart()` with NO `commands.restart` check
 - `src/infra/restart.ts:155` — `authorizeGatewaySigusr1Restart(delayMs)` pre-authorizes the SIGUSR1 signal
 - `src/cli/gateway-cli/run-loop.ts:190` — `consumeGatewaySigusr1RestartAuthorization()` returns true (pre-authorized), bypassing `isGatewaySigusr1RestartExternallyAllowed()`
-- **Contrast:** `src/agents/tools/gateway-tool.ts:85` — the explicit `restart` action correctly checks `commands.restart`
+- **Contrast:** `src/agents/tools/gateway-tool.ts:153` — the explicit `restart` action correctly checks `commands.restart`
 
 **No key-level authorization:** Config validation is structural (JSON schema) only. No allowlist/denylist restricts which keys agents may modify.
 
@@ -855,8 +855,8 @@ All changes take effect immediately via automatic restart.
 **Vulnerability:** The CLI `openclaw config get` command reads and outputs resolved config values (including secrets from `${ENV_VAR}` substitution) without applying the redaction system. The gateway RPC `config.get` handler correctly redacts via `redactConfigSnapshot()`, but the CLI path bypasses this entirely. A sandboxed agent with exec access can extract any API key configured via env var substitution.
 
 **Affected code:**
-- `src/cli/config-cli.ts:1137-1139` — `loadValidConfig()` returns resolved `snapshot.config`; `getAtPath()` reads values directly
-- `src/cli/config-cli.ts:1137-1159` — output paths (`defaultRuntime.log`) emit unredacted values
+- `src/cli/config-cli.ts:1116-1118` — `loadValidConfig()` returns resolved `snapshot.config`; `getAtPath()` reads values directly
+- `src/cli/config-cli.ts:1112-1140` — output paths (`defaultRuntime.log`) emit unredacted values
 
 **Correct implementation (for comparison):**
 - `src/gateway/server-methods/config.ts:290` — RPC handler calls `redactConfigSnapshot(snapshot)` before `respond()`
@@ -889,7 +889,7 @@ All changes take effect immediately via automatic restart.
 
 **Vulnerability:** The Nostr plugin registered HTTP endpoints for profile management (GET/PUT/POST on `/api/channels/nostr/:accountId/profile`) that accepted unauthenticated requests. The PUT path wrote attacker-controlled profile data directly to the gateway config file and triggered relay publish operations.
 
-**Fix:** Gateway now requires `authorizeGatewayConnect` for all `/api/channels/` plugin HTTP routes (`src/gateway/server-http.ts:308-368`). Channel plugin endpoints are gateway-auth protected by default; non-channel plugin routes remain plugin-owned. New `server.plugin-http-auth.test.ts` (174 lines). Also adds UI-side Nostr profile management in `ui/src/ui/app-channels.ts` (+23 lines).
+**Fix:** Gateway now requires `authorizeGatewayConnect` for all `/api/channels/` plugin HTTP routes (`src/gateway/server-http.ts:325-386`). Channel plugin endpoints are gateway-auth protected by default; non-channel plugin routes remain plugin-owned. New `server.plugin-http-auth.test.ts` (174 lines). Also adds UI-side Nostr profile management in `ui/src/ui/app-channels.ts` (+23 lines).
 
 ### #13937: HTML Not Escaped in Control UI Webchat (XSS)
 
@@ -913,7 +913,7 @@ All changes take effect immediately via automatic restart.
 
 **Affected code:**
 - `src/security/secret-equal.ts:3-16` — `safeEqualSecret()` (extracted from auth.ts, timing-safe)
-- `src/gateway/server-http.ts:382-402` — hook auth failure rate limiting added (Feb 13 sync 4, commit `113ebfd6a`): 20 failures/60s per client IP, HTTP 429 response
+- `src/gateway/server-http.ts:509-528` — hook auth failure rate limiting added (Feb 13 sync 4, commit `113ebfd6a`): 20 failures/60s per client IP, HTTP 429 response
 - `src/gateway/server/ws-connection/message-handler.ts` — no per-connection attempt limiting
 
 **Fix available:** PR [#13680](https://github.com/openclaw/openclaw/pull/13680) (OPEN, not merged) — per-IP sliding window: 10 failures in 60s → IP blocked for 5 minutes; HTTP 429 with Retry-After; localhost exempt.
@@ -950,7 +950,7 @@ All changes take effect immediately via automatic restart.
 **Vulnerability:** When using `${VAR}` syntax for `apiKey` in `openclaw.json`, OpenClaw resolves the environment variable to plaintext at runtime and writes the resolved value to the agent's `models.json` cache file (`~/.openclaw/agents/main/agent/models.json`). A sandboxed agent with file read access can extract any API key configured via env var substitution.
 
 **Affected code:**
-- `src/agents/models-config.providers.ts:483` — `normalizeProviders()` returns provider objects including resolved `apiKey` fields; `JSON.stringify({ providers: normalizedProviders })` serializes them to disk
+- `src/agents/models-config.providers.normalize.ts:19` — `normalizeProviders()` returns provider objects including resolved `apiKey` fields; `JSON.stringify({ providers: normalizedProviders })` serializes them to disk
 - `src/agents/models-config.ts:88` — file written with `mode: 0o600` (correct permissions, owner-only)
 
 **Mitigation:** File has 0o600 permissions (only owner-readable), so external users cannot read it. However, the agent process itself can read the file, and a sandboxed agent with exec access can `cat` the file to extract all provider API keys.
@@ -992,7 +992,7 @@ All changes take effect immediately via automatic restart.
 
 **Vulnerability:** ~~The `isPrivateIpAddress()` function does not recognize IPv4-compatible IPv6 addresses like `::127.0.0.1` or `::7f00:1` as private/loopback.~~ **FIXED by `c0c0e0f9a`** (Feb 15 sync 11).
 
-**Fix details:** `isPrivateIpAddress()` (`src/infra/net/ssrf.ts:108`) uses hextet-level IPv6 parsing via `parseIpv6WithEmbeddedIpv4()` (`src/shared/net/ip.ts:91`). `extractEmbeddedIpv4FromIpv6()` (`src/shared/net/ip.ts:279`) handles IPv4-mapped (`::ffff:a.b.c.d`), IPv4-compatible (`::a.b.c.d`), and full-form variants (`0000:0000:0000:0000:0000:ffff:7f00:0001`). New test file `ssrf.test.ts` covers all bypass variants. Pre-resolution and post-resolution checks at `resolvePinnedHostnameWithPolicy()` (`src/infra/net/ssrf.ts:276`) both use the fixed function.
+**Fix details:** `isPrivateIpAddress()` (`src/infra/net/ssrf.ts:108`) uses hextet-level IPv6 parsing via `parseIpv6WithEmbeddedIpv4()` (`src/shared/net/ip.ts:96`). `extractEmbeddedIpv4FromIpv6()` (`src/shared/net/ip.ts:287`) handles IPv4-mapped (`::ffff:a.b.c.d`), IPv4-compatible (`::a.b.c.d`), and full-form variants (`0000:0000:0000:0000:0000:ffff:7f00:0001`). New test file `ssrf.test.ts` covers all bypass variants. Pre-resolution and post-resolution checks at `resolvePinnedHostnameWithPolicy()` (`src/infra/net/ssrf.ts:276`) both use the fixed function.
 
 ### #11738: Canvas Authorization IP Co-Tenancy Bypass
 
@@ -1015,7 +1015,7 @@ All changes take effect immediately via automatic restart.
 
 **Affected code:**
 - `src/gateway/http-utils.ts:65-79` — `resolveSessionKey()` returns `x-openclaw-session-key` header value as-is (line 71-73) with no ownership check
-- `src/gateway/tools-invoke-http.ts:44-48` — `resolveSessionKeyFromBody()` accepts arbitrary session key from request body
+- `src/gateway/tools-invoke-http.ts:51-56` — `resolveSessionKeyFromBody()` accepts arbitrary session key from request body
 - Affected endpoints: `/v1/chat/completions`, `/v1/responses`, `/tools/invoke`, `/hooks/agent`
 
 ### #11024: Gmail Push Endpoint Embeds Auth Token in URL Query String
@@ -1059,7 +1059,7 @@ All changes take effect immediately via automatic restart.
 **Vulnerability:** The runtime model catalog (resolved from `openclaw.json` providers) is serialized into every LLM request payload as system prompt context. Environment variable references (`${VAR}`) are resolved to plaintext before serialization, so all provider API keys are sent to whichever LLM provider handles the request. Every provider sees every other provider's keys.
 
 **Affected code:**
-- `src/agents/models-config.providers.ts:483` — `normalizeProviders()` returns provider objects including resolved `apiKey` fields
+- `src/agents/models-config.providers.normalize.ts:19` — `normalizeProviders()` returns provider objects including resolved `apiKey` fields
 - `src/agents/models-config.providers.ts` — provider normalization includes credential resolution
 
 **Relationship:** Related to #14808 (apiKey in models.json cache, now WONTFIX), #13683 (CLI config get unredacted), and #9627 (config write-back). Different vector: keys leaked to LLM providers via prompt, not just disk/CLI.
@@ -1190,7 +1190,7 @@ All changes take effect immediately via automatic restart.
 **Affected code:**
 - `src/gateway/server/ws-connection/connect-policy.ts:22-34` — `allowInsecureAuthConfigured` + `allowBypass` flags resolved via `resolveControlUiAuthPolicy()`
 - `src/gateway/server/ws-connection/connect-policy.ts:84-126` — `evaluateMissingDeviceIdentity()` handles device identity check; HTTPS enforcement skipped when `allowBypass = true`
-- `src/gateway/server/ws-connection/message-handler.ts:515` — `handleMissingDeviceIdentity()`: device pairing requirement skipped when `allowInsecureAuth` configured
+- `src/gateway/server/ws-connection/message-handler.ts:520` — `handleMissingDeviceIdentity()`: device pairing requirement skipped when `allowInsecureAuth` configured
 - `src/security/audit.ts:565-577` — security audit detects and flags as `severity: "warn"` (checkId: `gateway.control_ui.insecure_auth`), but audit is advisory only
 
 **Exploit conditions:** Admin must set `allowInsecureAuth: true` (opt-in). Once enabled, passive MITM on the local network can capture the auth token and gain full `operator.admin + operator.approvals + operator.pairing` access.
@@ -1286,7 +1286,7 @@ All changes take effect immediately via automatic restart.
 
 **Affected code:**
 - `src/agents/bootstrap-files.ts:52-55` — `applyContextModeFilter()` returns all files unless `contextMode === "lightweight"` (never set for subagent sessions)
-- `src/agents/pi-embedded-runner/run/attempt.ts:1732` — `contextMode: params.bootstrapContextMode` — `bootstrapContextMode` is not set for subagent sessions; defaults to `undefined`
+- `src/agents/pi-embedded-runner/run/attempt.ts:371` — `contextMode: params.bootstrapContextMode` — `bootstrapContextMode` is not set for subagent sessions; defaults to `undefined`
 
 **Impact:** Subagents receive the owner's personal context files (SOUL.md, IDENTITY.md, USER.md) on every invocation. In multi-tenant deployments, this expands the attack surface for persona hijacking via subagent prompt injection. Cross-ref #11900 (context files loaded for all senders regardless of owner status).
 
