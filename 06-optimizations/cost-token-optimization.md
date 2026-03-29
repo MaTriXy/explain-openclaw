@@ -207,10 +207,10 @@ entries:
     runtime_refs: [src/agents/memory-search.ts]
   - id: TOKCFG_SESSION_MEMORY_INDEXING
     paths: [agents.defaults.memorySearch.experimental.sessionMemory, agents.defaults.memorySearch.sources, agents.defaults.memorySearch.sync.sessions.deltaBytes, agents.defaults.memorySearch.sync.sessions.deltaMessages]
-    runtime_refs: [src/agents/memory-search.ts, src/memory/manager-sync-ops.ts, src/memory/session-files.ts]
+    runtime_refs: [src/agents/memory-search.ts, extensions/memory-core/src/memory/manager-sync-ops.ts, extensions/memory-core/src/memory/session-files.ts]
   - id: TOKCFG_QMD_SNIPPET_BUDGET
     paths: [memory.qmd.limits.maxResults, memory.qmd.limits.maxSnippetChars, memory.qmd.limits.maxInjectedChars, memory.qmd.sessions.enabled]
-    runtime_refs: [src/memory/backend-config.ts, src/memory/qmd-manager.ts]
+    runtime_refs: [extensions/memory-core/src/memory/backend-config.ts, extensions/memory-core/src/memory/qmd-manager.ts]
   - id: TOKCFG_WEB_SEARCH_FETCH_BOUNDS
     paths: [tools.web.search.maxResults, tools.web.search.perplexity.model, tools.web.search.grok.model, tools.web.fetch.maxChars, tools.web.fetch.maxCharsCap]
     runtime_refs: [src/agents/tools/web-search.ts, src/agents/tools/web-fetch.ts]
@@ -611,7 +611,8 @@ Prices are per million tokens via OpenRouter (Feb 2026). Append `:floor` to any 
 | `deepseek/deepseek-chat` | $0.30 | $1.20 | Cheapest capable chat model |
 | `meta-llama/llama-4-scout` | $0.08 | $0.30 | Cheapest open-weight model |
 | `moonshot/kimi-k2.5` | $0.45 | $2.25 | Strong coding, budget price |
-| `minimax/minimax-m2.1` | $0.27 | $0.95 | Budget coding alternative |
+| `minimax/MiniMax-M2.7` | $0.27 | $0.95 | Default MiniMax model (upgraded from M2.5) |
+| `minimax/MiniMax-M2.7-highspeed` | $0.27 | $0.95 | MiniMax fast mode variant |
 | `perplexity/sonar-pro` | $3.00 | $15.00 | Best search quality (+$5/K searches) |
 | `perplexity/sonar` | $1.00 | $1.00 | Budget native search (+$5/K searches) |
 | `openrouter/auto` | varies | varies | Routes to best model; you pay that model's rate |
@@ -649,7 +650,7 @@ Different OpenClaw functions have varying compute requirements. Using the right 
 |----------|--------------|----------------|-------------|
 | **Main Chat (Brain)** | `anthropic/claude-opus-4-6` | `moonshot/kimi-k2.5` | `agents.defaults.model.primary` |
 | **Heartbeat** | `anthropic/claude-haiku-4-5` | `anthropic/claude-haiku-4-5` | `agents.defaults.heartbeat.model` |
-| **Coding** | `codex-cli/gpt-5.2-codex` | `minimax/MiniMax-M2.1` | `agents.defaults.cliBackends` |
+| **Coding** | `openai-codex/gpt-5.4` | `minimax/MiniMax-M2.7` | `agents.defaults.cliBackends` |
 | **Web Search/Browsing** | `perplexity/sonar-pro` | `perplexity/sonar` | `tools.web.search.perplexity.model` |
 | **Content Writing** | `anthropic/claude-opus-4-6` | `moonshot/kimi-k2.5` | (same as main chat) |
 | **Voice** | `openai/gpt-4o-mini-transcribe` | `openai/gpt-4o-mini-transcribe` | `tools.media.audio.models` |

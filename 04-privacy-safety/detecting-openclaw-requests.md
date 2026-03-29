@@ -124,6 +124,16 @@ Also used for MiniMax usage checking:
 
 **Who sees this:** MiniMax API servers.
 
+### `X-Client-Source: "openclaw"` — Tavily API (v2026.3.28-beta.1+)
+
+OpenClaw marks outbound Tavily API requests with a client source header:
+
+```
+X-Client-Source: openclaw
+```
+
+**Who sees this:** Tavily API servers (used for search and extract tools).
+
 ### `clientInfo.name: "openclaw-acp-client"` — ACP protocol
 
 When OpenClaw connects to an ACP (Agent Communication Protocol) server, it identifies itself at the protocol level:
@@ -174,7 +184,7 @@ headers: {
 - **SSRF guard behavior:** The internal SSRF guard may produce distinctive redirect-following or timing patterns.
 - **Static version:** The hardcoded Chrome 122 version string will become increasingly stale over time, making it detectable via version-age analysis.
 
-**Configurable:** Yes — `tools.web.fetch.userAgent` in the config (`src/config/types.tools.ts:514`).
+**Configurable:** Yes — `tools.web.fetch.userAgent` in the config (`src/config/types.tools.ts:537`).
 
 ---
 

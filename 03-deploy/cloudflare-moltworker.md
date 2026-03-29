@@ -2,7 +2,7 @@
 
 > **Note:** This guide is for OpenClaw (formerly Moltbot/Clawdbot). Moltworker is a proof-of-concept serverless deployment — not an official Cloudflare product.
 >
-> **Supplementary resource:** [Kimi K2.5 Cloudflare Guide](../explain-clawdbot-kilocode-kimi-k2.5/cloudflare-moltworker.md) provides additional explanations for D1 Database, KV, and Queues with beginner-friendly analogies. Note: it does not cover Sandbox SDK (the core runtime) and its security analysis contains inaccuracies -- use this guide for actual deployment.
+> **Supplementary resource:** [Kimi K2.5 Cloudflare Guide](../../explain-clawdbot-kilocode-kimi-k2.5/cloudflare-moltworker.md) provides additional explanations for D1 Database, KV, and Queues with beginner-friendly analogies. Note: it does not cover Sandbox SDK (the core runtime) and its security analysis contains inaccuracies -- use this guide for actual deployment.
 
 ## Table of contents (Explain OpenClaw)
 
@@ -419,7 +419,7 @@ Moltworker uses these secrets:
 | Secret | Required | Purpose |
 |--------|----------|---------|
 | `ANTHROPIC_API_KEY` or `AI_GATEWAY_API_KEY` | Yes | LLM access |
-| `MOLTBOT_GATEWAY_TOKEN` | Yes | Control UI authentication |
+| `OPENCLAW_GATEWAY_TOKEN` | Yes | Control UI authentication |
 | `CF_ACCESS_TEAM_DOMAIN` | Recommended | Cloudflare Access team domain |
 | `CF_ACCESS_AUD` | Recommended | Cloudflare Access audience tag |
 | `R2_ACCESS_KEY_ID` | Optional | R2 storage credentials |
@@ -437,7 +437,7 @@ wrangler secret put ANTHROPIC_API_KEY
 # (paste your key when prompted)
 
 # Required: gateway auth token
-wrangler secret put MOLTBOT_GATEWAY_TOKEN
+wrangler secret put OPENCLAW_GATEWAY_TOKEN
 # (use a strong random value: openssl rand -hex 32)
 
 # Recommended: Cloudflare Access protection
@@ -527,7 +527,7 @@ wrangler secret put CF_ACCESS_AUD          # audience tag from Access applicatio
 Required for Control UI access, passed via query parameter:
 
 ```text
-https://moltworker.your-subdomain.workers.dev/?token=YOUR_MOLTBOT_GATEWAY_TOKEN
+https://moltworker.your-subdomain.workers.dev/?token=YOUR_OPENCLAW_GATEWAY_TOKEN
 ```
 
 ### 3) Device Pairing
@@ -696,7 +696,7 @@ Verify your token:
 
 ```bash
 # Set via secret
-wrangler secret put MOLTBOT_GATEWAY_TOKEN
+wrangler secret put OPENCLAW_GATEWAY_TOKEN
 
 # Test
 curl -H "Authorization: Bearer YOUR_TOKEN" \
@@ -734,7 +734,7 @@ If empty after use, check worker logs for R2 write errors.
 
 ### Secrets
 
-- [ ] `MOLTBOT_GATEWAY_TOKEN` set (strong random value)
+- [ ] `OPENCLAW_GATEWAY_TOKEN` set (strong random value)
 - [ ] `CF_ACCESS_TEAM_DOMAIN` and `CF_ACCESS_AUD` set
 - [ ] Model provider API keys set as secrets
 - [ ] No secrets in wrangler.toml or committed code
