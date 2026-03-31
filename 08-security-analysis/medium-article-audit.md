@@ -8,11 +8,11 @@ In January 2026, a Medium article by Saad Khalid titled *"Why Clawdbot is a Bad 
 
 | Model | Coverage | Accuracy |
 |-------|----------|----------|
-| [Opus 4.5](../../explain-clawdbot-opus-4.5/11-security-audit-analysis.md#second-security-audit-medium-article-january-2026) | Most thorough: full 8-claim analysis with code file/line references, CVSS comparison, 3 legitimate gaps identified | All verdicts match source code review |
-| [Copilot GPT-5.2](../../explain-clawdbot-copilot-gpt-5.2/README.md#security-note-medium-audit-article-jan-2026) | Covers all 8 claims individually with code references and nuanced "attacker needs admin access" framing | High accuracy; minor error on claim 3 (logs.tail called "partially accurate" when schema fully blocks arbitrary paths) |
-| [GLM 4.7](../../explain-clawdbot-glm-4.7/README.md#audit-2-medium-article-why-clawdbot-is-a-bad-idea-saad-khalid) | 5-row table, but the claims analyzed do not match the article's actual findings | **Inaccurate** -- appears to have hallucinated or confused the article's claims with a different report (e.g., lists "CVE-2024-44946 Directory Traversal" and "Insecure Dependencies" which the article does not mention) |
-| [Gemini 3.0 Pro](../../explain-clawdbot-gemini-3.0-pro/README.md) | Brief bullet-point summary; correctly notes DNS rebinding is mitigated | **Mostly inaccurate** -- accepted auth bypass (#5), arbitrary read (#3), and RCE (#1) claims at face value without verifying against RBAC, schema validation, or Docker isolation |
-| [Kimi K2.5](../../explain-clawdbot-kilocode-kimi-k2.5/security-analysis.md#saad-khalids-security-audit) | Detailed coverage of all claims with CVSS scores, attack scenarios, "Auditor's Verdict" quote | **Inaccurate** -- accepts SSRF/DNS rebinding, logic bombs, self-approval bypass, and LD_PRELOAD claims at face value; does not verify against DNS pinning (`ssrf.ts`), Docker isolation, RBAC enforcement, or human approval flow; quotes auditor's "Do Not Deploy" verdict without challenge |
+| [Opus 4.5](../explain-clawdbot-opus-4.5/11-security-audit-analysis.md#second-security-audit-medium-article-january-2026) | Most thorough: full 8-claim analysis with code file/line references, CVSS comparison, 3 legitimate gaps identified | All verdicts match source code review |
+| [Copilot GPT-5.2](../explain-clawdbot-copilot-gpt-5.2/README.md#security-note-medium-audit-article-jan-2026) | Covers all 8 claims individually with code references and nuanced "attacker needs admin access" framing | High accuracy; minor error on claim 3 (logs.tail called "partially accurate" when schema fully blocks arbitrary paths) |
+| [GLM 4.7](../explain-clawdbot-glm-4.7/README.md#audit-2-medium-article-why-clawdbot-is-a-bad-idea-saad-khalid) | 5-row table, but the claims analyzed do not match the article's actual findings | **Inaccurate** -- appears to have hallucinated or confused the article's claims with a different report (e.g., lists "CVE-2024-44946 Directory Traversal" and "Insecure Dependencies" which the article does not mention) |
+| [Gemini 3.0 Pro](../explain-clawdbot-gemini-3.0-pro/README.md) | Brief bullet-point summary; correctly notes DNS rebinding is mitigated | **Mostly inaccurate** -- accepted auth bypass (#5), arbitrary read (#3), and RCE (#1) claims at face value without verifying against RBAC, schema validation, or Docker isolation |
+| [Kimi K2.5](../explain-clawdbot-kilocode-kimi-k2.5/security-analysis.md#saad-khalids-security-audit) | Detailed coverage of all claims with CVSS scores, attack scenarios, "Auditor's Verdict" quote | **Inaccurate** -- accepts SSRF/DNS rebinding, logic bombs, self-approval bypass, and LD_PRELOAD claims at face value; does not verify against DNS pinning (`ssrf.ts`), Docker isolation, RBAC enforcement, or human approval flow; quotes auditor's "Do Not Deploy" verdict without challenge |
 
 **Key disagreements resolved:**
 
@@ -29,13 +29,13 @@ In January 2026, a Medium article by Saad Khalid titled *"Why Clawdbot is a Bad 
 | # | Claim | Verdict | Source code evidence |
 |---|-------|---------|---------------------|
 | 1 | Config injection RCE via `setupCommand` | **Partially true, overstated** | `setupCommand` executes inside Docker container, not host (`src/agents/sandbox/docker.ts:472-473`). Config changes require gateway auth. |
-| 2 | Arbitrary write via `nodes:screen_record` outPath | **True but overstated** | `outPath` lacks path validation (`src/agents/tools/nodes-tool.ts:617-618`), but writes to paired node device, not gateway. |
+| 2 | Arbitrary write via `nodes:screen_record` outPath | **True but overstated** | `outPath` lacks path validation (`src/agents/tools/nodes-tool-media.ts:353-354`), but writes to paired node device, not gateway. |
 | 3 | Log traversal via `logs.tail` | **False** | Schema has `additionalProperties: false`, accepts only `cursor`/`limit`/`maxBytes` (`src/gateway/protocol/schema/logs-chat.ts:4-11`). File path from config, not request. |
 | 4 | DNS rebinding SSRF via web-fetch | **False** | `resolvePinnedHostname()` + `createPinnedDispatcher()` pins DNS (`src/infra/net/ssrf.ts:310-354`). Redirect-to-private-IP tested and blocked (`web-fetch.ssrf.test.ts:120-142`). |
 | 5 | Self-approving agent (no RBAC) | **False** | `authorizeGatewayMethod()` enforces role checks on every call (`src/gateway/server-methods.ts:100-157`). Agents blocked from approval methods. Further hardened by owner-only tool gating (`392bbddf2`), owner allowlist enforcement (`385a7eba3`), and nodes tool restricted to owners only (`9692dc766`). |
 | 6 | Token field shifting via pipe injection | **Misleading** | Pipe-delimited format exists (`src/gateway/device-auth.ts:34-47`) but tokens are RSA-signed. Modified payload fails signature verification. |
 | 7 | Shell injection via incomplete regex | **False** | `isSafeExecutableValue()` validates executable *names*, not commands (`src/infra/exec-safety.ts:16-44`). Strict allowlist: `/^[A-Za-z0-9._+-]+$/`. |
-| 8 | Env variable injection (LD_PRELOAD) | **Partially true, MITIGATED in PR #12; further hardened Feb 21 sync 7** | Gateway validates `params.env` via policy (`src/infra/host-env-security-policy.json`) and `validateHostEnv()` at `src/agents/bash-tools.exec-runtime.ts:77` (enforced at `src/agents/bash-tools.exec.ts:369`). `sanitizeHostExecEnv()` at `src/infra/host-env-security.ts:100` is the unified enforcement point. Node-host: `sanitizeEnv()` at `src/node-host/invoke.ts:95` delegates to `sanitizeHostExecEnv()`. Requires human approval + localhost. Related to GHSA-82g8-464f-2mv7. |
+| 8 | Env variable injection (LD_PRELOAD) | **Partially true, MITIGATED in PR #12; further hardened Feb 21 sync 7** | Gateway validates `params.env` via policy (`src/infra/host-env-security-policy.json`) and `validateHostEnv()` at `src/agents/bash-tools.exec-runtime.ts:82` (enforced at `src/agents/bash-tools.exec.ts:392`). `sanitizeHostExecEnv()` at `src/infra/host-env-security.ts:100` is the unified enforcement point. Node-host: `sanitizeEnv()` at `src/node-host/invoke.ts:95` delegates to `sanitizeHostExecEnv()`. Requires human approval + localhost. Related to GHSA-82g8-464f-2mv7. |
 
 **Result: 0 of 8 claims are exploitable as described.**
 
@@ -58,6 +58,6 @@ The article claims a "Complete White Box Penetration Test" but demonstrates a pa
 
 For defense-in-depth gap status and post-merge hardening notes, see [Post-merge security hardening](./post-merge-hardening.md).
 
-For full detailed analysis: [Opus 4.5 Security Audit Analysis](../../explain-clawdbot-opus-4.5/11-security-audit-analysis.md#second-security-audit-medium-article-january-2026)
+For full detailed analysis: [Opus 4.5 Security Audit Analysis](../explain-clawdbot-opus-4.5/11-security-audit-analysis.md#second-security-audit-medium-article-january-2026)
 
 Article: [Why Clawdbot is a Bad Idea (Medium)](https://saadkhalidhere.medium.com/why-clawdbot-is-a-bad-idea-critical-zero-days-found-in-my-audit-full-report-634602cb053f)
