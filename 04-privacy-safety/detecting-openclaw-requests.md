@@ -94,7 +94,7 @@ HTTP-Referer: https://openclaw.ai
 X-Title: OpenClaw Web Search
 ```
 
-**Source:** `extensions/perplexity/src/perplexity-web-search-provider.ts:251` (also at line 299)
+**Source:** `extensions/perplexity/src/perplexity-web-search-provider.ts:252` (also at line 300)
 ```typescript
 "HTTP-Referer": "https://openclaw.ai",
 "X-Title": "OpenClaw Web Search",
@@ -142,7 +142,7 @@ When OpenClaw connects to an ACP (Agent Communication Protocol) server, it ident
 { "name": "openclaw-acp-client", "version": "1.0.0" }
 ```
 
-**Source:** `src/acp/client.ts:577`
+**Source:** `src/acp/client.ts:399`
 ```typescript
 clientInfo: { name: "openclaw-acp-client", version: "1.0.0" },
 ```
@@ -184,7 +184,7 @@ headers: {
 - **SSRF guard behavior:** The internal SSRF guard may produce distinctive redirect-following or timing patterns.
 - **Static version:** The hardcoded Chrome 122 version string will become increasingly stale over time, making it detectable via version-age analysis.
 
-**Configurable:** Yes — `tools.web.fetch.userAgent` in the config (`src/config/types.tools.ts:537`).
+**Configurable:** Yes — `tools.web.fetch.userAgent` in the config (`src/config/types.tools.ts:541`).
 
 ---
 
@@ -602,12 +602,12 @@ OpenClaw's HTTP API endpoints read several custom headers from inbound requests.
 
 | Header | Read at | Purpose | HTTP endpoint(s) |
 |---|---|---|---|
-| `x-openclaw-agent-id` | `src/gateway/http-utils.ts:27` | Agent routing — selects which named agent handles the request | `/v1/chat/completions`, `/v1/responses` |
-| `x-openclaw-agent` | `src/gateway/http-utils.ts:28` | Agent routing (fallback alias for `x-openclaw-agent-id`) | Same as above |
-| `x-openclaw-session-key` | `src/gateway/http-utils.ts:71` | Session pinning — pins request to a specific named session | `/v1/chat/completions`, `/v1/responses` |
+| `x-openclaw-agent-id` | `src/gateway/http-utils.ts:187` | Agent routing — selects which named agent handles the request | `/v1/chat/completions`, `/v1/responses` |
+| `x-openclaw-agent` | `src/gateway/http-utils.ts:188` | Agent routing (fallback alias for `x-openclaw-agent-id`) | Same as above |
+| `x-openclaw-session-key` | `src/gateway/http-utils.ts:281` | Session pinning — pins request to a specific named session | `/v1/chat/completions`, `/v1/responses` |
 | `x-openclaw-token` | `src/gateway/hooks.ts:147-148` | Webhook authentication — alternative to `Authorization: Bearer` | `/hooks/*` |
-| `x-openclaw-message-channel` | `src/gateway/tools-invoke-http.ts:213` | Tool policy routing — specifies channel context (e.g., `"discord"`, `"slack"`) | `/tools/invoke` |
-| `x-openclaw-account-id` | `src/gateway/tools-invoke-http.ts:216` | Account-level tool policy routing | `/tools/invoke` |
+| `x-openclaw-message-channel` | `src/gateway/tools-invoke-http.ts:243` | Tool policy routing — specifies channel context (e.g., `"discord"`, `"slack"`) | `/tools/invoke` |
+| `x-openclaw-account-id` | `src/gateway/tools-invoke-http.ts:245` | Account-level tool policy routing | `/tools/invoke` |
 
 ### WAF rules for inbound Gateway protection
 

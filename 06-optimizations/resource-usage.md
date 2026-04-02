@@ -25,9 +25,9 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | # | Operation | Source | Impact | Plain English |
 |---|-----------|--------|--------|---------------|
 | 1 | **Screenshot normalization** — nested loop of up to 7 sizes x 6 qualities = 42 sharp resize ops per screenshot | `extensions/browser/src/browser/screenshot.ts:35-57` | Very High | Like resizing a photo 42 different ways to find which version fits in an envelope — each resize takes real effort |
-| 2 | **PNG image optimization** — grid of 5 sizes x 4 compression levels = 20 sharp ops (mozjpeg is CPU-heavy) | `src/media/image-ops.ts:400-457` | Very High | Like printing the same photo in 20 different quality settings to find the smallest file — each print job takes CPU time |
+| 2 | **PNG image optimization** — grid of 5 sizes x 4 compression levels = 20 sharp ops (mozjpeg is CPU-heavy) | `src/media/image-ops.ts:603-660` | Very High | Like printing the same photo in 20 different quality settings to find the smallest file — each print job takes CPU time |
 | 3 | **Local embedding inference** — on-device GGUF model via node-llama-cpp, `Promise.all` over all texts | `extensions/memory-core/src/memory/embeddings.ts:103-164` | Very High (when local) | Like running a mini-ChatGPT on your own machine to understand your notes — powerful but demands serious CPU |
-| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:149-178` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
+| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:150-179` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
 | 5 | **Cosine similarity fallback** — O(n) full-scan vector comparison when sqlite-vec unavailable | `extensions/memory-core/src/memory/manager-search.ts:74-149` | High (per query) | Like comparing a new photo to every single photo in your album one-by-one, instead of using a smart index |
 | 6 | **PDF-to-image rendering** — per-page canvas creation + PNG encoding via `@napi-rs/canvas` | `src/media/pdf-extract.ts:42-103` | High (per PDF) | Like photocopying each page of a PDF into a separate image file — each page takes a rendering pass |
 | 7 | **Full AX tree traversal** — `Accessibility.getFullAXTree` on complex browser pages | `extensions/browser/src/browser/cdp.ts:282-295` | Medium-High | Like reading every element on a web page aloud for accessibility — hundreds of elements on complex pages |
@@ -36,8 +36,8 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | 10 | **Ed25519 keypair generation** — asymmetric crypto on first run / device identity creation | `src/infra/device-identity.ts:57` | Low (one-time) | Like generating a strong password — intensive but happens only once |
 | 11 | **Memory sync** — file hashing + markdown chunking + embedding + SQLite FTS5/vec indexing | `extensions/memory-core/src/memory/manager-sync-ops.ts:693` | Medium (periodic) | Like re-indexing a library catalog — scanning, categorizing, and filing every document |
 | 12 | **TTS generation** — ElevenLabs/OpenAI/Edge TTS API calls + audio buffer handling | `src/tts/tts.ts` (barrel → `plugin-sdk/speech-runtime.js`) | Medium | API calls are remote but audio buffer conversion is local CPU work |
-| 13 | **Agent execution loop** — continuous model response processing | `src/auto-reply/reply/agent-runner-execution.ts:115` | Medium (continuous) | The main "brain" loop — always running while the bot is responding |
-| 14 | **Cron timer loop** — re-arming `setTimeout` for scheduled job processing | `src/cron/service/timer.ts:621` | Low (idle) | Like a clock ticking in the background — minimal CPU unless jobs are firing |
+| 13 | **Agent execution loop** — continuous model response processing | `src/auto-reply/reply/agent-runner-execution.ts:139` | Medium (continuous) | The main "brain" loop — always running while the bot is responding |
+| 14 | **Cron timer loop** — re-arming `setTimeout` for scheduled job processing | `src/cron/service/timer.ts:639` | Low (idle) | Like a clock ticking in the background — minimal CPU unless jobs are firing |
 
 ### Other CPU consumers
 
@@ -51,7 +51,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 - SHA-256 hashing for content deduplication and caching
 
 **Child process stdout/stderr accumulation:**
-- `src/process/exec.ts:302-308` — unbounded string concatenation of process output
+- `src/process/exec.ts:334-338` — unbounded string concatenation of process output
 - `extensions/memory-core/src/memory/qmd-manager.ts` — QMD process output is capped at `MAX_QMD_OUTPUT_CHARS` (200,000 chars by default). The `resolveSpawnInvocation()` helper at `:72` handles Windows-compatible spawn routing.
 
 **Media fetch buffering:**
@@ -125,7 +125,7 @@ Modules loaded via jiti persist for process lifetime. Each plugin's tools, comma
 | Command logger | `src/hooks/bundled/command-logger/handler.ts:47-62` | **No rotation** — `commands.log` grows unbounded |
 | Telegram sticker cache | `src/telegram/sticker-cache.ts:35-67` | **No eviction** — JSON grows with unique stickers |
 | Browser user-data profiles | `extensions/browser/src/browser/chrome.ts:80-81` | Full Chromium profile — can reach GBs |
-| SQLite databases | `extensions/memory-core/src/memory/manager-sync-ops.ts:265-275` | **No VACUUM** — database grows unbounded without periodic vacuuming (uses default DELETE journal mode, no WAL) |
+| SQLite databases | `extensions/memory-core/src/memory/manager-sync-ops.ts:88-98` | **No VACUUM** — database grows unbounded without periodic vacuuming (uses default DELETE journal mode, no WAL) |
 | Per-day log file size | `src/logging/logger.ts:49,187-202` | **Capped** — 500MB default (`DEFAULT_MAX_LOG_FILE_BYTES`), configurable via `logging.maxFileBytes`; warns once then suppresses writes when reached |
 | Voice-call `calls.jsonl` | `extensions/voice-call/src/manager/store.ts:7-10` | **Append-only, no rotation** + full-file reads on load |
 
