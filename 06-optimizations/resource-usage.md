@@ -27,7 +27,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | 1 | **Screenshot normalization** — nested loop of up to 7 sizes x 6 qualities = 42 sharp resize ops per screenshot | `extensions/browser/src/browser/screenshot.ts:35-57` | Very High | Like resizing a photo 42 different ways to find which version fits in an envelope — each resize takes real effort |
 | 2 | **PNG image optimization** — grid of 5 sizes x 4 compression levels = 20 sharp ops (mozjpeg is CPU-heavy) | `src/media/image-ops.ts:603-660` | Very High | Like printing the same photo in 20 different quality settings to find the smallest file — each print job takes CPU time |
 | 3 | **Local embedding inference** — on-device GGUF model via node-llama-cpp, `Promise.all` over all texts | `extensions/memory-core/src/memory/embeddings.ts:103-164` | Very High (when local) | Like running a mini-ChatGPT on your own machine to understand your notes — powerful but demands serious CPU |
-| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:150-179` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
+| 4 | **Plugin loading via jiti** — synchronous TypeScript transpilation per plugin at startup | `src/plugins/loader.ts:157-192` | High (startup) | Like compiling a recipe book from scratch every time you open the kitchen, instead of using a pre-printed copy |
 | 5 | **Cosine similarity fallback** — O(n) full-scan vector comparison when sqlite-vec unavailable | `extensions/memory-core/src/memory/manager-search.ts:74-149` | High (per query) | Like comparing a new photo to every single photo in your album one-by-one, instead of using a smart index |
 | 6 | **PDF-to-image rendering** — per-page canvas creation + PNG encoding via `@napi-rs/canvas` | `src/media/pdf-extract.ts:42-103` | High (per PDF) | Like photocopying each page of a PDF into a separate image file — each page takes a rendering pass |
 | 7 | **Full AX tree traversal** — `Accessibility.getFullAXTree` on complex browser pages | `extensions/browser/src/browser/cdp.ts:282-295` | Medium-High | Like reading every element on a web page aloud for accessibility — hundreds of elements on complex pages |
@@ -51,7 +51,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 - SHA-256 hashing for content deduplication and caching
 
 **Child process stdout/stderr accumulation:**
-- `src/process/exec.ts:334-338` — unbounded string concatenation of process output
+- `src/process/exec.ts:337-342` — unbounded string concatenation of process output
 - `extensions/memory-core/src/memory/qmd-manager.ts` — QMD process output is capped at `MAX_QMD_OUTPUT_CHARS` (200,000 chars by default). The `resolveSpawnInvocation()` helper at `:72` handles Windows-compatible spawn routing.
 
 **Media fetch buffering:**
@@ -73,7 +73,7 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 | History map | `src/auto-reply/reply/history.ts:7` | 1000 keys LRU | Well bounded |
 | Inbound dedupe | `src/auto-reply/reply/inbound-dedupe.ts:9` | 5000 max, 20min TTL | Well bounded |
 | Gateway dedupe | `src/gateway/server-constants.ts:26-27` | 1000 max, 5min TTL | Well bounded |
-| Browser roleRefs | `extensions/browser/src/browser/pw-session.ts:112-113` | 50 max LRU | Well bounded |
+| Browser roleRefs | `extensions/browser/src/browser/pw-session.ts:114-115` | 50 max LRU | Well bounded |
 | Followup queues | `src/auto-reply/reply/queue/state.ts:19` | 20/queue, no queue count cap; `clearFollowupQueue()` (`queue/cleanup.ts:24`) clears individual queues during session cleanup | **Partially mitigated** — individual queues can be cleared but total queue-map still uncapped |
 | Agent event seqByRun | `src/infra/agent-events.ts:23` | **No cleanup** (`seqByRun` never pruned; `runContextById` now cleaned via `clearAgentRunContext()` at `:49`) | **Partial leak** — `runContextById` fixed, `seqByRun` still leaks |
 | Agent run sequence | `src/gateway/server-runtime-state.ts:234` | Bounded at `AGENT_RUN_SEQ_MAX` = 10,000 (pruned by maintenance timer) | Well bounded |
@@ -90,10 +90,10 @@ Users report OpenClaw can be resource-intensive. This guide documents every reso
 
 ### Browser memory
 
-- **Chromium instance** (Playwright CDP): `extensions/browser/src/browser/pw-session.ts:119` — connection cache (`cachedByCdpUrl`), but Chromium itself can consume **200MB to 2GB+**
+- **Chromium instance** (Playwright CDP): `extensions/browser/src/browser/pw-session.ts:121` — connection cache (`cachedByCdpUrl`), but Chromium itself can consume **200MB to 2GB+**
   > *Like having a full web browser running invisibly in the background — it alone can use more memory than everything else combined.*
-- Per-page state caps: console (500), errors (200), network requests (500) — `extensions/browser/src/browser/pw-session.ts:115-117`
-- WeakMaps used for page/context state (GC-friendly): `extensions/browser/src/browser/pw-session.ts:105-106`
+- Per-page state caps: console (500), errors (200), network requests (500) — `extensions/browser/src/browser/pw-session.ts:117-120`
+- WeakMaps used for page/context state (GC-friendly): `extensions/browser/src/browser/pw-session.ts:107-108`
 
 ### Model context accumulation
 
