@@ -606,8 +606,8 @@ OpenClaw's HTTP API endpoints read several custom headers from inbound requests.
 | `x-openclaw-agent` | `src/gateway/http-utils.ts:188` | Agent routing (fallback alias for `x-openclaw-agent-id`) | Same as above |
 | `x-openclaw-session-key` | `src/gateway/http-utils.ts:281` | Session pinning — pins request to a specific named session | `/v1/chat/completions`, `/v1/responses` |
 | `x-openclaw-token` | `src/gateway/hooks.ts:147-148` | Webhook authentication — alternative to `Authorization: Bearer` | `/hooks/*` |
-| `x-openclaw-message-channel` | `src/gateway/tools-invoke-http.ts:243` | Tool policy routing — specifies channel context (e.g., `"discord"`, `"slack"`) | `/tools/invoke` |
-| `x-openclaw-account-id` | `src/gateway/tools-invoke-http.ts:245` | Account-level tool policy routing | `/tools/invoke` |
+| `x-openclaw-message-channel` | `src/gateway/tools-invoke-http.ts:225` | Tool policy routing — specifies channel context (e.g., `"discord"`, `"slack"`) | `/tools/invoke` |
+| `x-openclaw-account-id` | `src/gateway/tools-invoke-http.ts:227` | Account-level tool policy routing | `/tools/invoke` |
 
 ### WAF rules for inbound Gateway protection
 
